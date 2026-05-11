@@ -148,8 +148,8 @@ export function LoopGraph() {
       source: "observe",
       target: "think",
       type: "animated",
-      sourceHandle: "s-right",
-      targetHandle: "t-right",
+      sourceHandle: "s-top",
+      targetHandle: "t-bottom",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
       data: {
         isActive: completedPhases.has("observe") && currentPhase === "think" && running,
