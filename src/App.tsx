@@ -105,7 +105,7 @@ export default function App() {
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-          className="flex-[2] min-w-0 p-4"
+          className="flex-[2] min-w-0 p-4 flex flex-col min-h-0"
         >
           <StepDetailPanel />
         </motion.aside>

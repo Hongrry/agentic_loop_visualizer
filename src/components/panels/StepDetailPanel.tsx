@@ -1,3 +1,4 @@
+import { useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
@@ -44,6 +45,13 @@ const phaseBadgeLabel: Record<string, string> = {
 function ThinkContent({ step }: { step: LoopStep }) {
   const status = useRuntimeStore((s) => s.status);
   const isStreaming = status === "running";
+  const thoughtRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (isStreaming && thoughtRef.current) {
+      thoughtRef.current.scrollTop = thoughtRef.current.scrollHeight;
+    }
+  }, [step.thought, isStreaming]);
 
   return (
     <motion.div
@@ -84,7 +92,10 @@ function ThinkContent({ step }: { step: LoopStep }) {
               </span>
             )}
           </div>
-          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap">
+          <div
+            ref={thoughtRef}
+            className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap"
+          >
             {step.thought}
           </div>
         </div>
@@ -255,9 +266,16 @@ export function StepDetailPanel() {
   const steps = useRuntimeStore((s) => s.steps);
   const currentStepIndex = useRuntimeStore((s) => s.currentStepIndex);
   const status = useRuntimeStore((s) => s.status);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] : undefined;
   const PhaseIcon = currentStep ? phaseIcons[currentStep.phase] : Brain;
+
+  useLayoutEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [currentStep?.id, currentStep?.thought, currentStep?.toolOutput, status]);
 
   if (status === "idle") {
     return (
@@ -315,7 +333,7 @@ export function StepDetailPanel() {
           </Badge>
         )}
       </div>
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep?.id ?? "empty"}
