@@ -112,7 +112,7 @@ export default function App() {
       </main>
 
       {/* 底部：循环节点 / Timeline Player */}
-      {isActive && (
+      { (
         <footer className="shrink-0 border-t border-white/5 bg-surface-800/40 backdrop-blur-xl">
           <div className="px-5 py-3">
             <TimelinePlayer />
