@@ -3,6 +3,8 @@ import {
   ReactFlow,
   Background,
   Controls,
+  Position,
+  MarkerType,
   type Node,
   type Edge,
   type ConnectionLineComponent,
@@ -30,6 +32,14 @@ const edgeTypes = { animated: AnimatedEdge };
 
 const phaseOrder: LoopPhase[] = ["think", "act", "observe", "end"];
 
+// Triangle ring layout: think/act/observe form a circle, end exits left
+const nodePositions: Record<LoopPhase, { x: number; y: number }> = {
+  think: { x: 120, y: 40 },
+  act: { x: 280, y: 160 },
+  observe: { x: 120, y: 280 },
+  end: { x: 0, y: 160 },
+};
+
 function getCurrentPhase(step: LoopStep | undefined): LoopPhase | null {
   if (!step) return null;
   return step.phase;
@@ -44,7 +54,6 @@ function getCompletedPhases(steps: LoopStep[], currentIndex: number): Set<LoopPh
   return completed;
 }
 
-// Connection line rendered while user drags
 const ConnectionLine: ConnectionLineComponent = ({ fromX, fromY, toX, toY }) => {
   const dx = toX - fromX;
   const dy = toY - fromY;
@@ -69,78 +78,99 @@ export function LoopGraph() {
   const completedPhases = getCompletedPhases(steps, currentStepIndex);
 
   const nodes: Node<PhaseNodeData>[] = useMemo(() => {
-    const nodeList: Node<PhaseNodeData>[] = [];
-    const startY = 60;
-    const gap = 110;
-
-    phaseOrder.forEach((phase, index) => {
-      nodeList.push({
-        id: phase,
-        type: "phaseNode",
-        position: { x: 80, y: startY + index * gap },
-        data: {
-          phase,
-          label: phase === "think" ? "思考" : phase === "act" ? "执行" : phase === "observe" ? "观察" : "结束",
-          isActive: currentPhase === phase && (status === "running" || status === "completed" || status === "paused"),
-          isCompleted: completedPhases.has(phase),
-        },
-      });
-    });
-
-    return nodeList;
+    return phaseOrder.map((phase) => ({
+      id: phase,
+      type: "phaseNode",
+      position: nodePositions[phase],
+      data: {
+        phase,
+        label: phase === "think" ? "思考" : phase === "act" ? "执行" : phase === "observe" ? "观察" : "结束",
+        isActive: currentPhase === phase && (status === "running" || status === "completed" || status === "paused"),
+        isCompleted: completedPhases.has(phase),
+      },
+    }));
   }, [currentPhase, completedPhases, status]);
 
   const edges: Edge<AnimatedEdgeData>[] = useMemo(() => {
     const edgeList: Edge<AnimatedEdgeData>[] = [];
+    const running = status !== "idle";
 
-    for (let i = 0; i < phaseOrder.length - 1; i++) {
-      const source = phaseOrder[i];
-      const target = phaseOrder[i + 1];
-      const sourceConfig = phaseConfig[source];
-      const isEdgeActive =
-        completedPhases.has(source) &&
-        (currentPhase === target || (completedPhases.has(target) && currentPhase !== "end"));
+    // An edge is active when source is completed AND target is the current phase
+    // This shows the "flow" direction — only the edge leading to the current node lights up
 
-      edgeList.push({
-        id: `e-${source}-${target}`,
-        source,
-        target,
-        type: "animated",
-        data: {
-          isActive: isEdgeActive && status !== "idle",
-          color: sourceConfig.color,
-        },
-      });
-    }
+    // think → act (top → right)
+    edgeList.push({
+      id: "e-think-act",
+      source: "think",
+      target: "act",
+      type: "animated",
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.think.color, width: 16, height: 16 },
+      data: {
+        isActive: completedPhases.has("think") && currentPhase === "act" && running,
+        color: phaseConfig.think.color,
+      },
+    });
 
-    // Cycle edge from Observe back to Think (loop)
-    const isLoopActive = completedPhases.has("observe") && (currentPhase === "think" || status === "running");
+    // act → observe (right → bottom)
+    edgeList.push({
+      id: "e-act-observe",
+      source: "act",
+      target: "observe",
+      type: "animated",
+      sourcePosition: Position.Bottom,
+      targetPosition: Position.Right,
+      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.act.color, width: 16, height: 16 },
+      data: {
+        isActive: completedPhases.has("act") && currentPhase === "observe" && running,
+        color: phaseConfig.act.color,
+      },
+    });
 
+    // observe → end (bottom → left)
+    edgeList.push({
+      id: "e-observe-end",
+      source: "observe",
+      target: "end",
+      type: "animated",
+      sourcePosition: Position.Left,
+      targetPosition: Position.Right,
+      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
+      data: {
+        isActive: completedPhases.has("observe") && currentPhase === "end" && running,
+        color: phaseConfig.observe.color,
+      },
+    });
+
+    // observe → think (loop back)
     edgeList.push({
       id: "e-observe-think-loop",
       source: "observe",
       target: "think",
       type: "animated",
+      sourcePosition: Position.Right,
+      targetPosition: Position.Right,
+      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
       data: {
-        isActive: isLoopActive,
-        color: phaseConfig.think.color,
+        isActive: completedPhases.has("observe") && currentPhase === "think" && running,
+        color: phaseConfig.observe.color,
       },
       style: { strokeDasharray: "6 4" },
     });
 
-    // Think → End direct edge (no tool calls)
-    const showThinkToEnd = hasDirectThinkToEnd(steps);
-    if (showThinkToEnd) {
-      const isThinkEndActive =
-        completedPhases.has("think") && (currentPhase === "end" || status === "completed");
-
+    // think → end (direct exit when no tool calls)
+    if (hasDirectThinkToEnd(steps)) {
       edgeList.push({
         id: "e-think-end-direct",
         source: "think",
         target: "end",
         type: "animated",
+        sourcePosition: Position.Left,
+        targetPosition: Position.Top,
+        markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.end.color, width: 16, height: 16 },
         data: {
-          isActive: isThinkEndActive && status !== "idle",
+          isActive: completedPhases.has("think") && currentPhase === "end" && running,
           color: phaseConfig.end.color,
           dashed: true,
         },

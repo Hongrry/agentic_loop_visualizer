@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { BaseEdge, getStraightPath, type EdgeProps } from "@xyflow/react";
+import { BaseEdge, getBezierPath, type EdgeProps } from "@xyflow/react";
 
 type AnimatedEdgeData = {
   isActive: boolean;
@@ -7,13 +7,20 @@ type AnimatedEdgeData = {
   dashed?: boolean;
 };
 
-const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, data }: EdgeProps) => {
+const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) => {
   const edgeData = data as unknown as AnimatedEdgeData | undefined;
   const color = edgeData?.color ?? "#0a84ff";
   const isActive = edgeData?.isActive ?? false;
   const dashed = edgeData?.dashed ?? false;
 
-  const [edgePath] = getStraightPath({ sourceX, sourceY, targetX, targetY });
+  const [edgePath] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
 
   return (
     <BaseEdge

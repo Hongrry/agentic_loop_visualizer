@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Layers } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRuntimeStore } from "@/store/runtimeStore";
 import { phaseConfig } from "@/components/loop/phaseConfig";
@@ -104,38 +103,32 @@ export function DecisionTrail() {
 
   if (status === "idle") {
     return (
-      <Card className="h-full flex flex-col">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-accent-400" />
-            <CardTitle>决策链路</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-white/30 text-center leading-relaxed">
-            运行智能体后<br />在此查看每一步的决策原因
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+          <Layers className="h-3.5 w-3.5 text-white/35" />
+          <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">决策链路</span>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs text-white/25 text-center leading-relaxed px-4">
+            运行智能体后在此查看每一步的决策原因
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (groups.length === 0) {
     return (
-      <Card className="h-full flex flex-col">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-accent-400" />
-            <CardTitle>决策链路</CardTitle>
-            <Badge variant="default" className="ml-auto">
-              0 轮
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-white/30 text-center">暂无决策数据</p>
-        </CardContent>
-      </Card>
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+          <Layers className="h-3.5 w-3.5 text-white/35" />
+          <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">决策链路</span>
+          <Badge variant="default" className="ml-auto text-[10px]">0 轮</Badge>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs text-white/25 text-center">暂无决策数据</p>
+        </div>
+      </div>
     );
   }
 
@@ -151,17 +144,13 @@ export function DecisionTrail() {
 
   return (
     <>
-      <Card className="h-full flex flex-col">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-accent-400" />
-            <CardTitle>决策链路</CardTitle>
-            <Badge variant="default" className="ml-auto">
-              {groups.length} 轮
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto p-0">
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+          <Layers className="h-3.5 w-3.5 text-white/35" />
+          <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">决策链路</span>
+          <Badge variant="default" className="ml-auto text-[10px]">{groups.length} 轮</Badge>
+        </div>
+        <div className="flex-1 overflow-y-auto">
           <div className="space-y-px">
             <AnimatePresence>
               {groups.map((group, idx) => {
@@ -180,18 +169,13 @@ export function DecisionTrail() {
                       onClick={() => setSelectedRound(group.round)}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-white/[0.02] transition-colors duration-200 cursor-pointer"
                     >
-                      {/* Round badge */}
                       <span className="shrink-0 flex items-center justify-center w-12 h-6 rounded-full bg-white/10 text-xs font-semibold text-white/60">
                         第{group.round}轮
                       </span>
-
-                      {/* Phase icon */}
                       <PhaseIcon
                         phase={group.thinkStep?.phase ?? group.steps[0]?.phase ?? "think"}
                         className="h-3.5 w-3.5 shrink-0"
                       />
-
-                      {/* Decision summary */}
                       <span className="flex-1 text-xs text-white/70 truncate">
                         {hasDecision ? group.decisionReason : "推理中..."}
                       </span>
@@ -201,8 +185,8 @@ export function DecisionTrail() {
               })}
             </AnimatePresence>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {selectedRound !== null && (
         <DecisionDetailDrawer

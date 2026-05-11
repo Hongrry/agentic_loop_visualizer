@@ -9,7 +9,6 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRuntimeStore } from "@/store/runtimeStore";
 import type { LoopStep } from "@/types/runtime";
@@ -262,63 +261,61 @@ export function StepDetailPanel() {
 
   if (status === "idle") {
     return (
-      <Card className="h-full flex flex-col">
-        <CardHeader>
-          <CardTitle>步骤详情</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-white/30 text-center leading-relaxed">
-            输入您的问题并点击运行<br />开始查看智能体运行详情
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+          <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">步骤详情</span>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs text-white/25 text-center leading-relaxed px-4">
+            输入您的问题并点击运行，开始查看智能体运行详情
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   if (status === "error") {
     const errorMsg = useRuntimeStore.getState().error;
     return (
-      <Card className="h-full flex flex-col border-glow-rose/20">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-glow-rose" />
-            <CardTitle className="text-glow-rose">执行出错</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <div className="h-full flex flex-col">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+          <AlertCircle className="h-3.5 w-3.5 text-glow-rose" />
+          <span className="text-xs font-semibold text-glow-rose uppercase tracking-wider">执行出错</span>
+        </div>
+        <div className="flex-1 p-4">
           <div className="rounded-lg bg-glow-rose/8 p-4 text-sm text-glow-rose border border-glow-rose/15">
             {errorMsg ?? "发生未知错误"}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          {currentStep && PhaseIcon && (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep.phase + currentStep.id}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-              >
-                <PhaseIcon className={`h-4 w-4 ${phaseColors[currentStep.phase]}`} />
-              </motion.div>
-            </AnimatePresence>
-          )}
-          <CardTitle>{currentStep?.title ?? "步骤详情"}</CardTitle>
-          {currentStep && (
-            <Badge variant={phaseBadgeVariant[currentStep.phase]}>
-              {phaseBadgeLabel[currentStep.phase]}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto">
+    <div className="h-full flex flex-col">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
+        {currentStep && PhaseIcon && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep.phase + currentStep.id}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            >
+              <PhaseIcon className={`h-3.5 w-3.5 ${phaseColors[currentStep.phase]}`} />
+            </motion.div>
+          </AnimatePresence>
+        )}
+        <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">
+          {currentStep?.title ?? "步骤详情"}
+        </span>
+        {currentStep && (
+          <Badge variant={phaseBadgeVariant[currentStep.phase]} className="text-[10px]">
+            {phaseBadgeLabel[currentStep.phase]}
+          </Badge>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto p-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep?.id ?? "empty"}
@@ -333,7 +330,7 @@ export function StepDetailPanel() {
             {currentStep?.phase === "end" && <EndContent step={currentStep} />}
           </motion.div>
         </AnimatePresence>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
