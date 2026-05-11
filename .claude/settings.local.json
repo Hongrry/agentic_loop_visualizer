@@ -10,7 +10,8 @@
       "Bash(npx vite *)",
       "Bash(git diff *)",
       "Bash(npx eslint *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
