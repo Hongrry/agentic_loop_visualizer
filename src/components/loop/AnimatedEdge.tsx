@@ -7,7 +7,7 @@ type AnimatedEdgeData = {
   dashed?: boolean;
 };
 
-const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) => {
+const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, markerEnd, markerStart, data }: EdgeProps) => {
   const edgeData = data as unknown as AnimatedEdgeData | undefined;
   const color = edgeData?.color ?? "#0a84ff";
   const isActive = edgeData?.isActive ?? false;
@@ -26,6 +26,8 @@ const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosit
     <BaseEdge
       id={id}
       path={edgePath}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
       style={{
         stroke: isActive ? color : "rgba(255,255,255,0.08)",
         strokeWidth: 2,

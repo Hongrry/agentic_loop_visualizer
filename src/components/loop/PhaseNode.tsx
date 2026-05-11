@@ -35,10 +35,10 @@ const PhaseNode = memo(({ data }: NodeProps) => {
           boxShadow: nodeData.isActive ? `0 0 30px ${config.glowColor}` : "none",
         }}
       >
-        <Handle type="target" position={Position.Top} className="!bg-transparent" />
-        <Handle type="target" position={Position.Right} className="!bg-transparent" />
-        <Handle type="target" position={Position.Bottom} className="!bg-transparent" />
-        <Handle type="target" position={Position.Left} className="!bg-transparent" />
+        <Handle id="t-top" type="target" position={Position.Top} className="!bg-transparent" />
+        <Handle id="t-right" type="target" position={Position.Right} className="!bg-transparent" />
+        <Handle id="t-bottom" type="target" position={Position.Bottom} className="!bg-transparent" />
+        <Handle id="t-left" type="target" position={Position.Left} className="!bg-transparent" />
         <div
           style={{
             color: config.color,
@@ -53,10 +53,10 @@ const PhaseNode = memo(({ data }: NodeProps) => {
         >
           {nodeData.label}
         </span>
-        <Handle type="source" position={Position.Top} className="!bg-transparent" />
-        <Handle type="source" position={Position.Right} className="!bg-transparent" />
-        <Handle type="source" position={Position.Bottom} className="!bg-transparent" />
-        <Handle type="source" position={Position.Left} className="!bg-transparent" />
+        <Handle id="s-top" type="source" position={Position.Top} className="!bg-transparent" />
+        <Handle id="s-right" type="source" position={Position.Right} className="!bg-transparent" />
+        <Handle id="s-bottom" type="source" position={Position.Bottom} className="!bg-transparent" />
+        <Handle id="s-left" type="source" position={Position.Left} className="!bg-transparent" />
       </div>
     </motion.div>
   );
