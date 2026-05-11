@@ -4,6 +4,14 @@ import { toolDefinitions, executeToolCall } from "./tools";
 
 type StepCallback = (step: LoopStep) => void;
 
+type ChatMessage = {
+  role: string;
+  content: string;
+  tool_calls?: unknown[];
+  tool_call_id?: string;
+  reasoning_content?: string;
+};
+
 let stepCounter = 0;
 
 function nextStepId(): string {
@@ -11,10 +19,16 @@ function nextStepId(): string {
   return `step-${stepCounter}`;
 }
 
+export type LoopResult = {
+  steps: LoopStep[];
+  messages: ChatMessage[];
+};
+
 export async function runAgenticLoop(
   userInput: string,
-  onStep: StepCallback
-): Promise<LoopStep[]> {
+  onStep: StepCallback,
+  existingMessages?: ChatMessage[]
+): Promise<LoopResult> {
   const { model, hasKey } = getApiConfig();
 
   if (!hasKey) {
@@ -24,17 +38,13 @@ export async function runAgenticLoop(
   }
 
   const steps: LoopStep[] = [];
-  stepCounter = 0;
 
-  const messages: {
-    role: string;
-    content: string;
-    tool_calls?: unknown[];
-    tool_call_id?: string;
-  }[] = [
+  const messages: ChatMessage[] = [
+    ...(existingMessages ?? []),
     { role: "user", content: userInput },
   ];
 
+  const turnStartIndex = messages.length - 1;
   const contextHistory: string[] = [`用户输入: ${userInput}`];
 
   const MAX_LOOPS = 8;
@@ -105,7 +115,7 @@ export async function runAgenticLoop(
       };
       steps.push(errorStep);
       onStep(errorStep);
-      return steps;
+      return { steps, messages };
     }
 
     const duration = Date.now() - thinkStart;
@@ -143,6 +153,13 @@ export async function runAgenticLoop(
 
     // Check if done (no tool calls)
     if (!apiResponse.tool_calls || apiResponse.tool_calls.length === 0 || apiResponse.finish_reason === "stop") {
+      // Push final assistant message to history for multi-turn
+      messages.push({
+        role: "assistant",
+        content: apiResponse.content ?? "",
+        reasoning_content: apiResponse.reasoning_content ?? undefined,
+      });
+
       // --- END phase ---
       const endStep: LoopStep = {
         id: nextStepId(),
@@ -155,7 +172,7 @@ export async function runAgenticLoop(
       };
       steps.push(endStep);
       onStep(endStep);
-      return steps;
+      return { steps, messages };
     }
 
     // Push assistant message once (with all tool_calls) before processing individual tools
@@ -245,5 +262,5 @@ export async function runAgenticLoop(
   steps.push(exhaustedStep);
   onStep(exhaustedStep);
 
-  return steps;
+  return { steps, messages };
 }

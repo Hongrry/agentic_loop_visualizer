@@ -1,8 +1,17 @@
 import { create } from "zustand";
 import type { LoopStep, RuntimeStatus } from "@/types/runtime";
 import { runAgenticLoop } from "@/api/agentLoop";
+import type { LoopResult } from "@/api/agentLoop";
 
 let playbackInterval: ReturnType<typeof setInterval> | null = null;
+
+type ChatMessage = {
+  role: string;
+  content: string;
+  tool_calls?: unknown[];
+  tool_call_id?: string;
+  reasoning_content?: string;
+};
 
 type RuntimeState = {
   steps: LoopStep[];
@@ -12,6 +21,7 @@ type RuntimeState = {
   speed: number;
   error: string | null;
   userInput: string;
+  messages: ChatMessage[];
 
   setUserInput: (input: string) => void;
   startLoop: () => Promise<void>;
@@ -31,43 +41,56 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
   speed: 1,
   error: null,
   userInput: "",
+  messages: [],
 
   setUserInput: (input: string) => {
     set({ userInput: input });
   },
 
   startLoop: async () => {
-    const { userInput, steps } = get();
+    const { userInput, steps: existingSteps, messages: existingMessages } = get();
 
     if (!userInput.trim()) {
       set({ error: "请输入您的问题。" });
       return;
     }
 
-    set({ status: "running", error: null, steps: [], currentStepIndex: -1 });
+    set({ status: "running", error: null, currentStepIndex: existingSteps.length - 1 });
 
     try {
-      const allSteps: LoopStep[] = [];
-      await runAgenticLoop(userInput, (step: LoopStep) => {
-        const existingIndex = allSteps.findIndex((s) => s.id === step.id);
-        if (existingIndex >= 0) {
-          allSteps[existingIndex] = step;
-        } else {
-          allSteps.push(step);
-        }
-        set({
-          steps: [...allSteps],
-          currentStepIndex: allSteps.length - 1,
-        });
+      const turnSteps: LoopStep[] = [];
+      const result: LoopResult = await runAgenticLoop(
+        userInput,
+        (step: LoopStep) => {
+          const existingIndex = turnSteps.findIndex((s) => s.id === step.id);
+          if (existingIndex >= 0) {
+            turnSteps[existingIndex] = step;
+          } else {
+            turnSteps.push(step);
+          }
+          const mergedSteps = [...existingSteps, ...turnSteps];
+          set({
+            steps: mergedSteps,
+            currentStepIndex: mergedSteps.length - 1,
+          });
+        },
+        existingMessages.length > 0 ? existingMessages : undefined
+      );
+      // Use the final merged steps from result and save messages for next turn
+      const mergedSteps = [...existingSteps, ...result.steps];
+      set({
+        steps: mergedSteps,
+        currentStepIndex: mergedSteps.length - 1,
+        messages: result.messages,
+        status: "completed",
+        playing: false,
       });
-      set({ status: "completed", playing: false });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "运行时发生未知错误";
       set({
         status: "error",
         error: errorMsg,
         playing: false,
-        steps: get().steps.length === 0 ? steps : get().steps,
       });
     }
   },
@@ -151,6 +174,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
       playing: false,
       error: null,
       userInput: "",
+      messages: [],
     });
   },
 }));

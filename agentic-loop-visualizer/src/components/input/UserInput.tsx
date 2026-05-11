@@ -29,10 +29,8 @@ export function UserInput() {
       const inputToUse = localInput.trim() || userInput.trim();
       if (!inputToUse || isRunning) return;
 
-      if (!userInput) {
-        setUserInput(inputToUse);
-      }
-
+      setUserInput(inputToUse);
+      setLocalInput("");
       await startLoop();
     },
     [localInput, userInput, isRunning, setUserInput, startLoop]
@@ -106,7 +104,7 @@ export function UserInput() {
       </form>
 
       {/* Example prompts */}
-      {status === "idle" && (
+      {(status === "idle" || status === "completed") && (
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
