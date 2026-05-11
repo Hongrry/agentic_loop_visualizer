@@ -44,6 +44,9 @@ export type LoopStep = {
   thought?: string;
   goal?: string;
   decision?: string;
+  decisionReason?: string;
+  transitionLabel?: string;
+  loopRound?: number;
   toolName?: string;
   toolInput?: Record<string, unknown>;
   toolOutput?: Record<string, unknown>;

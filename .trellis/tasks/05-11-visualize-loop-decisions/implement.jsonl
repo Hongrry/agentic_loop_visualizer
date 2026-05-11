@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend spec overview and conventions"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Component creation and organization patterns"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TypeScript type safety when adding new fields to LoopStep"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Zustand store patterns"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend quality standards"}

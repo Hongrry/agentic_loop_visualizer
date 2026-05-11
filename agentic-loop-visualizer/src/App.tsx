@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Cpu, Activity, Key, Server } from "lucide-react";
 import { LoopGraph } from "@/components/loop/LoopGraph";
 import { StepDetailPanel } from "@/components/panels/StepDetailPanel";
-import { ContextPanel } from "@/components/panels/ContextPanel";
+import { DecisionTrail } from "@/components/panels/DecisionTrail";
 import { TimelinePlayer } from "@/components/timeline/TimelinePlayer";
 import { UserInput } from "@/components/input/UserInput";
 import { Badge } from "@/components/ui/badge";
@@ -102,7 +102,7 @@ export default function App() {
           transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
           className="w-[340px] shrink-0 p-5"
         >
-          <ContextPanel />
+          <DecisionTrail />
         </motion.aside>
       </main>
 

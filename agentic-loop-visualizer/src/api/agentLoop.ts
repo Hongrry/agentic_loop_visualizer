@@ -47,8 +47,10 @@ export async function runAgenticLoop(
   const contextHistory: string[] = [`用户输入: ${userInput}`];
 
   const MAX_LOOPS = 8;
+  let loopRound = 0;
 
   for (let loop = 0; loop < MAX_LOOPS; loop++) {
+    loopRound = loop + 1;
     const thinkStart = Date.now();
 
     // --- THINK phase ---
@@ -57,6 +59,7 @@ export async function runAgenticLoop(
       phase: "think",
       title: loop === 0 ? "Agent 分析用户意图" : `Agent 第 ${loop + 1} 轮推理`,
       thought: "正在调用 OpenAI API 进行推理...",
+      loopRound,
       contextBefore: [...contextHistory],
       contextAfter: [...contextHistory],
       apiRequest: {
@@ -143,11 +146,20 @@ export async function runAgenticLoop(
       );
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "未知错误";
+      thinkStep.decisionReason = errorMsg;
+      thinkStep.transitionLabel = "执行出错";
+      thinkStep.duration = Date.now() - thinkStart;
+      steps[steps.length - 1] = { ...thinkStep };
+      onStep({ ...thinkStep });
+
       const errorStep: LoopStep = {
         id: nextStepId(),
         phase: "end",
         title: "执行出错",
         finalAnswer: `API 调用失败: ${errorMsg}`,
+        decisionReason: errorMsg,
+        transitionLabel: "执行出错",
+        loopRound,
         contextBefore: [...contextHistory],
         contextAfter: [...contextHistory],
         duration: Date.now() - thinkStart,
@@ -168,10 +180,14 @@ export async function runAgenticLoop(
       const toolNames = apiResponse.tool_calls.map((tc) => tc.function.name).join(", ");
       thoughtText = `Agent 决定调用工具: ${toolNames}`;
       decisionText = `调用 ${toolNames}`;
+      thinkStep.decisionReason = `用户请求需要调用 ${toolNames} 获取数据`;
+      thinkStep.transitionLabel = `调用工具: ${toolNames}`;
     } else if (apiResponse.content) {
       thoughtText = apiResponse.content;
       decisionText = "直接输出答案";
       goalText = "生成最终回答";
+      thinkStep.decisionReason = "模型判断信息充足，直接回答";
+      thinkStep.transitionLabel = "直接输出答案";
     }
 
     thinkStep.apiResponse = apiResponse;
@@ -205,6 +221,9 @@ export async function runAgenticLoop(
         phase: "end",
         title: "输出最终答案",
         finalAnswer: apiResponse.content ?? "Agent 未能生成回答。",
+        decisionReason: "模型判断信息充足，直接回答",
+        transitionLabel: "直接输出答案",
+        loopRound,
         contextBefore: [...contextHistory],
         contextAfter: [...contextHistory],
         duration: 0,
@@ -240,6 +259,7 @@ export async function runAgenticLoop(
         title: `执行工具调用: ${toolCall.function.name}`,
         toolName: toolCall.function.name,
         toolInput,
+        loopRound,
         contextBefore: [...contextHistory],
         contextAfter: [...contextHistory],
       };
@@ -274,6 +294,8 @@ export async function runAgenticLoop(
         id: nextStepId(),
         phase: "observe",
         title: "工具结果注入上下文",
+        transitionLabel: "信息不足，继续分析",
+        loopRound,
         contextBefore: prevContext,
         contextAfter: afterContext,
         newContext: newContextEntries,
@@ -295,6 +317,9 @@ export async function runAgenticLoop(
     phase: "end",
     title: "达到最大循环次数",
     finalAnswer: `Agent 已达到最大循环次数 (${MAX_LOOPS})，请简化您的问题或稍后重试。`,
+    decisionReason: `达到最大循环次数(${MAX_LOOPS}轮)`,
+    transitionLabel: "循环终止",
+    loopRound,
     contextBefore: [...contextHistory],
     contextAfter: [...contextHistory],
   };
