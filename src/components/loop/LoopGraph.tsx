@@ -16,31 +16,6 @@ import { useRuntimeStore } from "@/store/runtimeStore";
 import { phaseConfig } from "./phaseConfig";
 import type { LoopPhase, LoopStep } from "@/types/runtime";
 
-function getMostRecentStepOfPhase(steps: LoopStep[], phase: LoopPhase): LoopStep | undefined {
-  for (let i = steps.length - 1; i >= 0; i--) {
-    if (steps[i].phase === phase) return steps[i];
-  }
-  return undefined;
-}
-
-function getLastThinkWithToolCall(steps: LoopStep[]): LoopStep | undefined {
-  for (let i = steps.length - 1; i >= 0; i--) {
-    if (steps[i].phase === "think" && steps[i].transitionLabel?.startsWith("调用工具")) {
-      return steps[i];
-    }
-  }
-  return undefined;
-}
-
-function getLastThinkWithDirectAnswer(steps: LoopStep[]): LoopStep | undefined {
-  for (let i = steps.length - 1; i >= 0; i--) {
-    if (steps[i].phase === "think" && steps[i].transitionLabel === "直接输出答案") {
-      return steps[i];
-    }
-  }
-  return undefined;
-}
-
 function hasDirectThinkToEnd(steps: LoopStep[]): boolean {
   for (let i = 1; i < steps.length; i++) {
     if (steps[i].phase === "end" && steps[i - 1].phase === "think") {
@@ -96,7 +71,7 @@ export function LoopGraph() {
   const nodes: Node<PhaseNodeData>[] = useMemo(() => {
     const nodeList: Node<PhaseNodeData>[] = [];
     const startY = 60;
-    const gap = 130;
+    const gap = 110;
 
     phaseOrder.forEach((phase, index) => {
       nodeList.push({
@@ -118,10 +93,6 @@ export function LoopGraph() {
   const edges: Edge<AnimatedEdgeData>[] = useMemo(() => {
     const edgeList: Edge<AnimatedEdgeData>[] = [];
 
-    const thinkWithTool = getLastThinkWithToolCall(steps);
-    const thinkWithAnswer = getLastThinkWithDirectAnswer(steps);
-    const mostRecentObserve = getMostRecentStepOfPhase(steps, "observe");
-
     for (let i = 0; i < phaseOrder.length - 1; i++) {
       const source = phaseOrder[i];
       const target = phaseOrder[i + 1];
@@ -129,11 +100,6 @@ export function LoopGraph() {
       const isEdgeActive =
         completedPhases.has(source) &&
         (currentPhase === target || (completedPhases.has(target) && currentPhase !== "end"));
-
-      let label: string | undefined;
-      if (source === "think" && thinkWithTool) {
-        label = thinkWithTool.transitionLabel;
-      }
 
       edgeList.push({
         id: `e-${source}-${target}`,
@@ -143,7 +109,6 @@ export function LoopGraph() {
         data: {
           isActive: isEdgeActive && status !== "idle",
           color: sourceConfig.color,
-          label,
         },
       });
     }
@@ -159,7 +124,6 @@ export function LoopGraph() {
       data: {
         isActive: isLoopActive,
         color: phaseConfig.think.color,
-        label: mostRecentObserve?.transitionLabel,
       },
       style: { strokeDasharray: "6 4" },
     });
@@ -178,7 +142,6 @@ export function LoopGraph() {
         data: {
           isActive: isThinkEndActive && status !== "idle",
           color: phaseConfig.end.color,
-          label: thinkWithAnswer?.transitionLabel,
           dashed: true,
         },
       });

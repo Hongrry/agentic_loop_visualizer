@@ -61,10 +61,10 @@ export function DecisionDetailDrawer({
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed right-0 top-0 h-full w-[50vw] z-50 bg-surface-800/95 backdrop-blur-xl border-l border-white/10 flex flex-col shadow-2xl"
+        className="fixed right-0 top-0 h-full w-[40vw] z-50 bg-surface-800/95 backdrop-blur-xl border-l border-white/10 flex flex-col shadow-2xl"
       >
         {/* 头部 */}
-        <div className="shrink-0 px-8 py-5 border-b border-white/5 flex items-center gap-3">
+        <div className="shrink-0 px-5 py-3 border-b border-white/5 flex items-center gap-3">
           <button
             type="button"
             disabled={!hasPrev}
@@ -100,9 +100,9 @@ export function DecisionDetailDrawer({
         </div>
 
         {/* 内容区 */}
-        <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* 区块1: 本轮目标 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               本轮目标
             </span>
@@ -112,12 +112,12 @@ export function DecisionDetailDrawer({
           </div>
 
           {/* 区块2: 模型推理过程 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               模型推理过程
             </span>
             {hasReasoningContent ? (
-              <pre className="mt-2 p-4 rounded-xl bg-surface-900/50 border border-white/5 text-xs text-white/60 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">
+              <pre className="mt-2 p-3 rounded-lg bg-surface-900/50 border border-white/5 text-xs text-white/60 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">
                 {thinkStep!.apiResponse!.reasoning_content}
               </pre>
             ) : (
@@ -127,7 +127,7 @@ export function DecisionDetailDrawer({
 
           {/* 区块3: 可用工具列表 (条件渲染) */}
           {hasTools && (
-            <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+            <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
               <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
                 可用工具列表
               </span>
@@ -137,7 +137,7 @@ export function DecisionDetailDrawer({
                   return (
                     <div
                       key={tool.function.name}
-                      className={`rounded-xl p-3 border transition-colors duration-200 ${
+                      className={`rounded-lg p-3 border transition-colors duration-200 ${
                         isSelected
                           ? "border-glow-amber/30 bg-glow-amber/8"
                           : "border-white/5 bg-surface-900/40"
@@ -168,7 +168,7 @@ export function DecisionDetailDrawer({
           )}
 
           {/* 区块4: 模型决策 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               模型决策
             </span>
@@ -205,7 +205,7 @@ export function DecisionDetailDrawer({
 
           {/* 区块5: 工具执行结果 (条件渲染) */}
           {hasToolCalls && (
-            <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+            <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
               <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
                 工具执行结果
               </span>
@@ -239,12 +239,12 @@ export function DecisionDetailDrawer({
           )}
 
           {/* 区块6: 大模型原始返回 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               大模型原始返回
             </span>
             {thinkStep?.apiResponse ? (
-              <pre className="mt-2 p-4 rounded-xl bg-surface-900/50 border border-white/5 text-xs text-white/50 font-mono whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
+              <pre className="mt-2 p-3 rounded-lg bg-surface-900/50 border border-white/5 text-xs text-white/50 font-mono whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto">
                 {JSON.stringify(
                   {
                     content: thinkStep.apiResponse.content,
@@ -261,7 +261,7 @@ export function DecisionDetailDrawer({
           </div>
 
           {/* 区块7: 上下文变化 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               上下文变化
             </span>
@@ -312,7 +312,7 @@ export function DecisionDetailDrawer({
           </div>
 
           {/* 区块8: 耗时 */}
-          <div className="rounded-xl border border-white/5 bg-surface-900/30 p-5">
+          <div className="rounded-lg border border-white/5 bg-surface-900/30 p-4">
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               耗时
             </span>

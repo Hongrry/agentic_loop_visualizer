@@ -127,7 +127,7 @@ function ContextBlock({ items, variant }: { items: string[]; variant: BlockVaria
 
   if (items.length === 0) {
     return (
-      <div className={`rounded-xl border ${style.border} ${style.bg} p-4 text-sm text-white/30 italic`}>
+      <div className={`rounded-lg border ${style.border} ${style.bg} p-4 text-sm text-white/30 italic`}>
         暂无数据
       </div>
     );
@@ -141,7 +141,7 @@ function ContextBlock({ items, variant }: { items: string[]; variant: BlockVaria
           initial={variant === "added" ? { opacity: 0, x: -10 } : { opacity: 1 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: variant === "added" ? i * 0.08 : 0, duration: 0.3, ease: "easeOut" }}
-          className={`rounded-xl border ${style.border} ${style.bg} p-3 text-xs ${style.text} font-mono leading-relaxed`}
+          className={`rounded-lg border ${style.border} ${style.bg} p-3 text-xs ${style.text} font-mono leading-relaxed`}
         >
           {variant === "added" && (
             <span className="text-glow-green mr-1">+</span>

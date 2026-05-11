@@ -36,7 +36,7 @@ export default function App() {
   return (
     <div className="h-full w-full flex flex-col bg-surface-900 overflow-hidden">
       <header className="shrink-0 border-b border-white/5 bg-surface-800/50 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
             <motion.div
               animate={
@@ -75,14 +75,14 @@ export default function App() {
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-[280px] shrink-0 border-r border-white/5 bg-surface-800/20 backdrop-blur-sm"
+          className="w-[240px] shrink-0 border-r border-white/5 bg-surface-800/20 backdrop-blur-sm"
         >
-          <div className="p-4 border-b border-white/5">
+          <div className="px-5 py-3 border-b border-white/5">
             <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">
               循环运行时图谱
             </span>
           </div>
-          <div className="h-[calc(100%-49px)]">
+          <div className="h-[calc(100%-41px)]">
             <LoopGraph />
           </div>
         </motion.aside>
@@ -91,7 +91,7 @@ export default function App() {
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-          className="flex-1 min-w-0 border-r border-white/5 p-5"
+          className="flex-1 min-w-0 border-r border-white/5 p-4"
         >
           <StepDetailPanel />
         </motion.section>
@@ -100,14 +100,14 @@ export default function App() {
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-          className="w-[340px] shrink-0 p-5"
+          className="w-[300px] shrink-0 p-4"
         >
           <DecisionTrail />
         </motion.aside>
       </main>
 
       <footer className="shrink-0 border-t border-white/5 bg-surface-800/40 backdrop-blur-xl">
-        <div className="px-6 py-4 space-y-3">
+        <div className="px-5 py-3 space-y-3">
           <UserInput />
           {isActive && <TimelinePlayer />}
         </div>

@@ -56,7 +56,7 @@ function ThinkContent({ step }: { step: LoopStep }) {
       {step.goal && (
         <div>
           <Label>当前目标</Label>
-          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/80 border border-white/5">
+          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/80 border border-white/5">
             {step.goal}
           </div>
         </div>
@@ -64,7 +64,7 @@ function ThinkContent({ step }: { step: LoopStep }) {
       {step.decision && (
         <div>
           <Label>决策</Label>
-          <div className="mt-1.5 flex items-center gap-2 rounded-xl bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15">
+          <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15">
             <ChevronRight className="h-4 w-4 shrink-0" />
             {step.decision}
           </div>
@@ -85,7 +85,7 @@ function ThinkContent({ step }: { step: LoopStep }) {
               </span>
             )}
           </div>
-          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap">
+          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap">
             {step.thought}
           </div>
         </div>
@@ -110,14 +110,14 @@ function ActContent({ step }: { step: LoopStep }) {
     >
       <div>
         <Label>工具名称</Label>
-        <div className="mt-1.5 rounded-xl bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15 font-mono">
+        <div className="mt-1.5 rounded-lg bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15 font-mono">
           {step.toolName ?? "未知"}
         </div>
       </div>
       {step.toolInput && (
         <div>
           <Label>输入参数</Label>
-          <pre className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-xs text-white/70 font-mono leading-relaxed border border-white/5 overflow-x-auto">
+          <pre className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-xs text-white/70 font-mono leading-relaxed border border-white/5 overflow-x-auto">
             {JSON.stringify(step.toolInput, null, 2)}
           </pre>
         </div>
@@ -129,7 +129,7 @@ function ActContent({ step }: { step: LoopStep }) {
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
         >
           <Label>执行结果</Label>
-          <pre className="mt-1.5 rounded-xl bg-glow-green/8 p-4 text-xs text-glow-green font-mono leading-relaxed border border-glow-green/15 overflow-x-auto">
+          <pre className="mt-1.5 rounded-lg bg-glow-green/8 p-4 text-xs text-glow-green font-mono leading-relaxed border border-glow-green/15 overflow-x-auto">
             {JSON.stringify(step.toolOutput, null, 2)}
           </pre>
         </motion.div>
@@ -175,7 +175,7 @@ function ObserveContent({ step }: { step: LoopStep }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 + i * 0.1, duration: 0.3, ease: "easeOut" }}
-                className="rounded-xl bg-glow-green/8 p-3 text-sm text-glow-green border border-glow-green/15 font-mono"
+                className="rounded-lg bg-glow-green/8 p-3 text-sm text-glow-green border border-glow-green/15 font-mono"
               >
                 + {ctx}
               </motion.div>
@@ -209,7 +209,7 @@ function EndContent({ step }: { step: LoopStep }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4, ease: "easeOut" }}
-          className="mt-1.5 rounded-xl bg-accent-500/8 p-4 text-sm text-white/85 border border-accent-500/20 leading-relaxed whitespace-pre-wrap"
+          className="mt-1.5 rounded-lg bg-accent-500/8 p-4 text-sm text-white/85 border border-accent-500/20 leading-relaxed whitespace-pre-wrap"
         >
           {step.finalAnswer ?? "暂无最终答案"}
         </motion.div>
@@ -217,7 +217,7 @@ function EndContent({ step }: { step: LoopStep }) {
       {step.thought && (
         <div>
           <Label>执行总结</Label>
-          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/70 border border-white/5">
+          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 border border-white/5">
             {step.thought}
           </div>
         </div>
@@ -229,7 +229,7 @@ function EndContent({ step }: { step: LoopStep }) {
 function ContextList({ items }: { items: string[] }) {
   if (items.length === 0) {
     return (
-      <div className="mt-1.5 rounded-xl bg-white/[0.02] p-4 text-sm text-white/30 border border-white/5 italic">
+      <div className="mt-1.5 rounded-lg bg-white/[0.02] p-4 text-sm text-white/30 border border-white/5 italic">
         暂无上下文
       </div>
     );
@@ -239,7 +239,7 @@ function ContextList({ items }: { items: string[] }) {
       {items.map((item, i) => (
         <li
           key={i}
-          className="rounded-xl bg-white/[0.02] p-3 text-sm text-white/50 border border-white/5 font-mono text-xs"
+          className="rounded-lg bg-white/[0.02] p-3 text-sm text-white/50 border border-white/5 font-mono text-xs"
         >
           {item}
         </li>
@@ -286,7 +286,7 @@ export function StepDetailPanel() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-xl bg-glow-rose/8 p-4 text-sm text-glow-rose border border-glow-rose/15">
+          <div className="rounded-lg bg-glow-rose/8 p-4 text-sm text-glow-rose border border-glow-rose/15">
             {errorMsg ?? "发生未知错误"}
           </div>
         </CardContent>

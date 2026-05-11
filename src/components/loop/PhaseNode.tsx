@@ -20,7 +20,7 @@ const PhaseNode = memo(({ data }: NodeProps) => {
     >
       {nodeData.isActive && (
         <motion.div
-          className="absolute inset-0 rounded-3xl blur-2xl"
+          className="absolute inset-0 rounded-xl blur-2xl"
           style={{ backgroundColor: config.glowColor }}
           animate={{ opacity: [0.3, 0.55, 0.3] }}
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
@@ -28,7 +28,7 @@ const PhaseNode = memo(({ data }: NodeProps) => {
       )}
 
       <div
-        className="relative flex flex-col items-center justify-center gap-2.5 rounded-3xl px-7 py-5 min-w-[130px] border backdrop-blur-md z-10 transition-colors duration-500 ease-out"
+        className="relative flex flex-col items-center justify-center gap-2.5 rounded-xl px-5 py-3 min-w-[110px] border backdrop-blur-md z-10 transition-colors duration-500 ease-out"
         style={{
           backgroundColor: nodeData.isActive ? `${config.color}12` : nodeData.isCompleted ? `${config.color}0a` : "#1c1c1e",
           borderColor: nodeData.isActive ? `${config.color}60` : nodeData.isCompleted ? `${config.color}25` : "rgba(255,255,255,0.08)",
