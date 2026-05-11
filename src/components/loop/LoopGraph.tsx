@@ -104,7 +104,7 @@ export function LoopGraph() {
       target: "act",
       type: "animated",
       sourceHandle: "s-right",
-      targetHandle: "t-left",
+      targetHandle: "t-top",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.think.color, width: 16, height: 16 },
       data: {
         isActive: completedPhases.has("think") && currentPhase === "act" && running,
@@ -134,7 +134,7 @@ export function LoopGraph() {
       target: "end",
       type: "animated",
       sourceHandle: "s-left",
-      targetHandle: "t-right",
+      targetHandle: "t-bottom",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
       data: {
         isActive: completedPhases.has("observe") && currentPhase === "end" && running,

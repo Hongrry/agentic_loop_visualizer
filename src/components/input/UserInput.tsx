@@ -2,7 +2,16 @@ import { useState, useCallback } from "react";
 import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useRuntimeStore } from "@/store/runtimeStore";
+
+const EXAMPLES = [
+  { label: "示例问题", value: "" },
+  { label: "查询北京天气", value: "帮我查询北京天气并给出穿衣建议" },
+  { label: "分析特斯拉股票", value: "分析特斯拉股票当前是否值得投资" },
+  { label: "规划杭州旅游行程", value: "帮我规划一个三天两夜的杭州旅游行程" },
+  { label: "比较手机优缺点", value: "比较一下iPhone 16和华为Mate 70的优缺点" },
+];
 
 export function UserInput() {
   const [localInput, setLocalInput] = useState("");
@@ -33,13 +42,35 @@ export function UserInput() {
     reset();
   }, [reset]);
 
+  const handleExampleSelect = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value;
+      if (!value) return;
+      setLocalInput(value);
+      setUserInput(value);
+    },
+    [setUserInput]
+  );
+
   const displayValue = localInput || userInput;
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
+      <Select
+        defaultValue=""
+        onChange={handleExampleSelect}
+        disabled={isRunning}
+        className="w-[130px] shrink-0 h-9 text-xs"
+      >
+        {EXAMPLES.map((ex) => (
+          <option key={ex.value} value={ex.value} className="text-surface-900">
+            {ex.label}
+          </option>
+        ))}
+      </Select>
       <div className="relative flex-1">
         <Input
-          placeholder="输入您的问题，例如：帮我查询北京天气并给出穿衣建议"
+          placeholder="输入您的问题"
           value={displayValue}
           onChange={(e) => {
             setLocalInput(e.target.value);
@@ -48,11 +79,6 @@ export function UserInput() {
           disabled={isRunning}
           className="pr-10 h-9 text-sm"
         />
-        {isRunning && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Loader2 className="h-4 w-4 text-accent-400 animate-spin" />
-          </div>
-        )}
       </div>
       <Button
         type="submit"
