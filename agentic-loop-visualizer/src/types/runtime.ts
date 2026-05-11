@@ -28,6 +28,7 @@ export type ApiResponse = {
 
 export type ToolCall = {
   id: string;
+  type: "function";
   function: {
     name: string;
     arguments: string;
@@ -56,3 +57,21 @@ export type LoopStep = {
 };
 
 export type RuntimeStatus = "idle" | "running" | "paused" | "completed" | "error";
+
+export type StreamChunk = {
+  content: string;
+  reasoning_content: string;
+  deltaContent: string;
+  deltaReasoning: string;
+  finish_reason: string | null;
+  toolCalls: AccumulatedToolCall[];
+};
+
+export type AccumulatedToolCall = {
+  index: number;
+  id?: string;
+  function: {
+    name?: string;
+    arguments: string;
+  };
+};

@@ -1,5 +1,5 @@
-import type { LoopStep, ApiResponse } from "@/types/runtime";
-import { callOpenAI, buildToolMessage, buildAssistantToolCallMessage, getApiConfig } from "./openai";
+import type { LoopStep, ApiResponse, StreamChunk } from "@/types/runtime";
+import { callOpenAIStream, buildToolMessage, buildAssistantToolCallMessage, getApiConfig } from "./openai";
 import { toolDefinitions, executeToolCall } from "./tools";
 
 type StepCallback = (step: LoopStep) => void;
@@ -44,7 +44,6 @@ export async function runAgenticLoop(
     { role: "user", content: userInput },
   ];
 
-  const turnStartIndex = messages.length - 1;
   const contextHistory: string[] = [`用户输入: ${userInput}`];
 
   const MAX_LOOPS = 8;
@@ -76,32 +75,72 @@ export async function runAgenticLoop(
 
     let apiResponse: ApiResponse;
     try {
-      apiResponse = await callOpenAI({
-        model,
-        messages: messages.map((m) => {
-          const msg: {
-            role: string;
-            content: string;
-            tool_calls?: ApiResponse["tool_calls"];
-            tool_call_id?: string;
-            reasoning_content?: string;
-          } = {
-            role: m.role,
-            content: m.content,
-          };
-          if (m.tool_calls && m.role === "assistant") {
-            msg.tool_calls = m.tool_calls as ApiResponse["tool_calls"];
-          }
-          if ((m as { reasoning_content?: string }).reasoning_content && m.role === "assistant") {
-            msg.reasoning_content = (m as { reasoning_content?: string }).reasoning_content;
-          }
-          if (m.tool_call_id) {
-            msg.tool_call_id = m.tool_call_id;
-          }
-          return msg;
-        }),
-        tools: toolDefinitions,
+      const builtMessages = messages.map((m) => {
+        const msg: {
+          role: string;
+          content: string;
+          tool_calls?: ApiResponse["tool_calls"];
+          tool_call_id?: string;
+          reasoning_content?: string;
+        } = {
+          role: m.role,
+          content: m.content,
+        };
+        if (m.tool_calls && m.role === "assistant") {
+          msg.tool_calls = m.tool_calls as ApiResponse["tool_calls"];
+        }
+        if ((m as { reasoning_content?: string }).reasoning_content && m.role === "assistant") {
+          msg.reasoning_content = (m as { reasoning_content?: string }).reasoning_content;
+        }
+        if (m.tool_call_id) {
+          msg.tool_call_id = m.tool_call_id;
+        }
+        return msg;
       });
+
+      apiResponse = await callOpenAIStream(
+        {
+          model,
+          messages: builtMessages,
+          tools: toolDefinitions,
+        },
+        (chunk: StreamChunk) => {
+          // Real-time streaming update
+          let displayText = "";
+          if (chunk.reasoning_content) {
+            displayText += `[思考] ${chunk.reasoning_content}\n\n`;
+          }
+          if (chunk.content) {
+            displayText += chunk.content;
+          }
+          if (!displayText && chunk.toolCalls.length > 0) {
+            const toolNames = chunk.toolCalls
+              .filter((tc) => tc.function.name)
+              .map((tc) => tc.function.name)
+              .join(", ");
+            displayText = toolNames ? `正在准备调用工具: ${toolNames}...` : "正在分析...";
+          }
+
+          thinkStep.thought = displayText || "正在调用 OpenAI API 进行推理...";
+          thinkStep.apiResponse = {
+            finish_reason: (chunk.finish_reason as ApiResponse["finish_reason"]) ?? "stop",
+            content: chunk.content || undefined,
+            reasoning_content: chunk.reasoning_content || undefined,
+            tool_calls: chunk.toolCalls.length > 0
+              ? chunk.toolCalls.map((tc) => ({
+                  id: tc.id ?? "",
+                  type: "function" as const,
+                  function: {
+                    name: tc.function.name ?? "",
+                    arguments: tc.function.arguments,
+                  },
+                }))
+              : undefined,
+          };
+          steps[steps.length - 1] = { ...thinkStep };
+          onStep({ ...thinkStep });
+        }
+      );
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "未知错误";
       const errorStep: LoopStep = {
@@ -120,7 +159,7 @@ export async function runAgenticLoop(
 
     const duration = Date.now() - thinkStart;
 
-    // Update think step with real data
+    // Finalize think step after streaming completes
     let thoughtText = "";
     let decisionText = "";
     let goalText = loop === 0 ? userInput : "继续分析并决定下一步";
@@ -130,7 +169,7 @@ export async function runAgenticLoop(
       thoughtText = `Agent 决定调用工具: ${toolNames}`;
       decisionText = `调用 ${toolNames}`;
     } else if (apiResponse.content) {
-      thoughtText = `Agent 生成了回答，准备结束循环。`;
+      thoughtText = apiResponse.content;
       decisionText = "直接输出答案";
       goalText = "生成最终回答";
     }
@@ -144,7 +183,7 @@ export async function runAgenticLoop(
     if (apiResponse.content) {
       thinkStep.contextAfter = [
         ...contextHistory,
-        `Agent 思考: ${apiResponse.content.slice(0, 100)}...`,
+        `Agent 回复: ${apiResponse.content.slice(0, 100)}${apiResponse.content.length > 100 ? "..." : ""}`,
       ];
     }
 

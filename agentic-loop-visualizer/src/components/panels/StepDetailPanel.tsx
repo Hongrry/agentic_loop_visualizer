@@ -36,6 +36,9 @@ const phaseBadgeVariant = {
 };
 
 function ThinkContent({ step }: { step: LoopStep }) {
+  const status = useRuntimeStore((s) => s.status);
+  const isStreaming = status === "running";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -61,21 +64,25 @@ function ThinkContent({ step }: { step: LoopStep }) {
       )}
       {step.thought && (
         <div>
-          <Label>推理内容</Label>
-          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-300 font-mono leading-relaxed border border-surface-500/30">
+          <div className="flex items-center gap-2">
+            <Label>推理内容</Label>
+            {isStreaming && (
+              <span className="flex items-center gap-1 text-xs text-accent-400">
+                <motion.span
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
+                  className="h-1.5 w-1.5 rounded-full bg-accent-400"
+                />
+                实时接收中
+              </span>
+            )}
+          </div>
+          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-300 font-mono leading-relaxed border border-surface-500/30 max-h-60 overflow-y-auto whitespace-pre-wrap">
             {step.thought}
           </div>
         </div>
       )}
-      {step.apiResponse?.content && (
-        <div>
-          <Label>API 响应文本</Label>
-          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-300 font-mono leading-relaxed border border-surface-500/30 max-h-32 overflow-y-auto whitespace-pre-wrap">
-            {step.apiResponse.content}
-          </div>
-        </div>
-      )}
-      {step.duration !== undefined && step.duration > 0 && (
+      {step.duration !== undefined && step.duration > 0 && !isStreaming && (
         <div className="flex items-center gap-1 text-xs text-slate-500">
           <Clock className="h-3 w-3" />
           耗时: {step.duration}ms
