@@ -22,6 +22,7 @@ export type ApiRequest = {
 export type ApiResponse = {
   finish_reason: "stop" | "tool_calls" | "length";
   content?: string;
+  reasoning_content?: string;
   tool_calls?: ToolCall[];
 };
 

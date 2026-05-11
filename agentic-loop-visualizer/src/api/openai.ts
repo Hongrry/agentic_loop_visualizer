@@ -54,6 +54,7 @@ export async function callOpenAI(request: ApiRequest): Promise<ApiResponse> {
   return {
     finish_reason: choice.finish_reason ?? "stop",
     content: choice.message?.content ?? undefined,
+    reasoning_content: choice.message?.reasoning_content ?? undefined,
     tool_calls: choice.message?.tool_calls ?? undefined,
   };
 }
@@ -83,11 +84,16 @@ export function buildToolMessage(
 
 export function buildAssistantToolCallMessage(
   content: string | null,
-  toolCalls: ApiResponse["tool_calls"]
-): { role: string; content: string; tool_calls: typeof toolCalls } {
-  return {
+  toolCalls: ApiResponse["tool_calls"],
+  reasoningContent?: string | null
+): { role: string; content: string; tool_calls: typeof toolCalls; reasoning_content?: string } {
+  const msg: { role: string; content: string; tool_calls: typeof toolCalls; reasoning_content?: string } = {
     role: "assistant",
     content: content ?? "",
     tool_calls: toolCalls,
   };
+  if (reasoningContent) {
+    msg.reasoning_content = reasoningContent;
+  }
+  return msg;
 }

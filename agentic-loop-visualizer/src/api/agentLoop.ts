@@ -74,13 +74,16 @@ export async function runAgenticLoop(
             content: string;
             tool_calls?: ApiResponse["tool_calls"];
             tool_call_id?: string;
-            tool_calls_result?: unknown;
+            reasoning_content?: string;
           } = {
             role: m.role,
             content: m.content,
           };
           if (m.tool_calls && m.role === "assistant") {
             msg.tool_calls = m.tool_calls as ApiResponse["tool_calls"];
+          }
+          if ((m as { reasoning_content?: string }).reasoning_content && m.role === "assistant") {
+            msg.reasoning_content = (m as { reasoning_content?: string }).reasoning_content;
           }
           if (m.tool_call_id) {
             msg.tool_call_id = m.tool_call_id;
@@ -220,9 +223,10 @@ export async function runAgenticLoop(
       // Add tool result to messages for next iteration
       const assistantMsg = buildAssistantToolCallMessage(
         apiResponse.content ?? null,
-        apiResponse.tool_calls
+        apiResponse.tool_calls,
+        apiResponse.reasoning_content ?? null
       );
-      messages.push(assistantMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string });
+      messages.push(assistantMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string; reasoning_content?: string });
 
       const toolMsg = buildToolMessage(toolCall.id, toolOutput);
       messages.push(toolMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string });
