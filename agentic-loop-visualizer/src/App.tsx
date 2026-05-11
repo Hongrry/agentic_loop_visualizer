@@ -10,20 +10,20 @@ import { useRuntimeStore } from "@/store/runtimeStore";
 import { getApiConfig } from "@/api/openai";
 
 function ApiStatusIndicator() {
-  const { hasKey, model, baseUrl: _baseUrl } = getApiConfig();
+  const { hasKey, model } = getApiConfig();
 
   return (
     <div className="flex items-center gap-2 text-xs">
       <div className="flex items-center gap-1.5">
         <Key className={`h-3 w-3 ${hasKey ? "text-glow-green" : "text-glow-rose"}`} />
         <span className={hasKey ? "text-glow-green" : "text-glow-rose"}>
-          {hasKey ? "API Connected" : "No API Key"}
+          {hasKey ? "API 已连接" : "未配置 API 密钥"}
         </span>
       </div>
-      <div className="w-px h-3 bg-surface-500/50" />
+      <div className="w-px h-3 bg-white/10" />
       <div className="flex items-center gap-1.5">
-        <Server className="h-3 w-3 text-slate-500" />
-        <span className="text-slate-500 font-mono">{model}</span>
+        <Server className="h-3 w-3 text-white/40" />
+        <span className="text-white/40 font-mono">{model}</span>
       </div>
     </div>
   );
@@ -35,9 +35,8 @@ export default function App() {
 
   return (
     <div className="h-full w-full flex flex-col bg-surface-900 overflow-hidden">
-      {/* Header */}
-      <header className="shrink-0 border-b border-surface-500/30 bg-surface-800/50 backdrop-blur-sm">
-        <div className="flex items-center justify-between px-5 py-3">
+      <header className="shrink-0 border-b border-white/5 bg-surface-800/50 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <motion.div
               animate={
@@ -51,17 +50,18 @@ export default function App() {
             >
               <Cpu className="h-5 w-5 text-accent-400" />
             </motion.div>
-            <h1 className="text-base font-bold text-slate-100 tracking-wide">
-              Agentic Loop Visualizer
+            <h1 className="text-base font-semibold text-white/90 tracking-tight">
+              智能体循环可视化
             </h1>
             {isActive && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 <Badge variant="think" className="gap-1">
                   <Activity className="h-2.5 w-2.5" />
-                  Active
+                  运行中
                 </Badge>
               </motion.div>
             )}
@@ -70,49 +70,44 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content: Three Columns */}
       <main className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Left: Loop Graph */}
         <motion.aside
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.4 }}
-          className="w-[280px] shrink-0 border-r border-surface-500/30 bg-surface-800/30"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-[280px] shrink-0 border-r border-white/5 bg-surface-800/20 backdrop-blur-sm"
         >
-          <div className="p-3 border-b border-surface-500/20">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Loop Runtime Graph
+          <div className="p-4 border-b border-white/5">
+            <span className="text-xs font-semibold text-white/35 uppercase tracking-wider">
+              循环运行时图谱
             </span>
           </div>
-          <div className="h-[calc(100%-41px)]">
+          <div className="h-[calc(100%-49px)]">
             <LoopGraph />
           </div>
         </motion.aside>
 
-        {/* Center: Step Detail */}
         <motion.section
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex-1 min-w-0 border-r border-surface-500/30 p-4"
+          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+          className="flex-1 min-w-0 border-r border-white/5 p-5"
         >
           <StepDetailPanel />
         </motion.section>
 
-        {/* Right: Context Evolution */}
         <motion.aside
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="w-[340px] shrink-0 p-4"
+          transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+          className="w-[340px] shrink-0 p-5"
         >
           <ContextPanel />
         </motion.aside>
       </main>
 
-      {/* Bottom: Input + Timeline */}
-      <footer className="shrink-0 border-t border-surface-500/30 bg-surface-800/50 backdrop-blur-sm">
-        <div className="px-5 py-3 space-y-3">
+      <footer className="shrink-0 border-t border-white/5 bg-surface-800/40 backdrop-blur-xl">
+        <div className="px-6 py-4 space-y-3">
           <UserInput />
           {isActive && <TimelinePlayer />}
         </div>

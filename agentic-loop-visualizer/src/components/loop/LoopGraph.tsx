@@ -9,11 +9,11 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { PhaseNode } from "./PhaseNode";
-import type { PhaseNodeData } from "./PhaseNode";
+import type { PhaseNodeData } from "./phaseConfig";
 import { AnimatedEdge } from "./AnimatedEdge";
 import type { AnimatedEdgeData } from "./AnimatedEdge";
 import { useRuntimeStore } from "@/store/runtimeStore";
-import { phaseConfig } from "./PhaseNode";
+import { phaseConfig } from "./phaseConfig";
 import type { LoopPhase, LoopStep } from "@/types/runtime";
 
 const nodeTypes = { phaseNode: PhaseNode };
@@ -42,8 +42,8 @@ const ConnectionLine: ConnectionLineComponent = ({ fromX, fromY, toX, toY }) => 
   const path = `M${fromX},${fromY} C${fromX + dx * 0.5},${fromY + dy * 0.5} ${toX - dx * 0.5},${toY - dy * 0.5} ${toX},${toY}`;
   return (
     <g>
-      <path fill="none" stroke="#6366f1" strokeWidth={2} d={path} />
-      <circle r={4} fill="#6366f1">
+      <path fill="none" stroke="#0a84ff" strokeWidth={2} d={path} />
+      <circle r={4} fill="#0a84ff">
         <animateMotion dur="0.6s" repeatCount="indefinite" path={path} />
       </circle>
     </g>
@@ -71,7 +71,7 @@ export function LoopGraph() {
         position: { x: 80, y: startY + index * gap },
         data: {
           phase,
-          label: phase === "end" ? "End" : phase.charAt(0).toUpperCase() + phase.slice(1),
+          label: phase === "think" ? "思考" : phase === "act" ? "执行" : phase === "observe" ? "观察" : "结束",
           isActive: currentPhase === phase && (status === "running" || status === "completed" || status === "paused"),
           isCompleted: completedPhases.has(phase),
         },
@@ -146,7 +146,7 @@ export function LoopGraph() {
         preventScrolling={false}
         onInit={fitView}
       >
-        <Background color="#252532" gap={20} size={1} />
+        <Background color="#2c2c2e" gap={20} size={1} />
         <Controls
           className="!bg-surface-700 !border-surface-500 !rounded-lg"
           style={{ bottom: 0 }}

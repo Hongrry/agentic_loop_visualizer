@@ -1,25 +1,8 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
-import { Brain, Wrench, Eye, Flag } from "lucide-react";
-import type { LoopPhase } from "@/types/runtime";
-
-type PhaseNodeData = {
-  phase: LoopPhase;
-  label: string;
-  isActive: boolean;
-  isCompleted: boolean;
-};
-
-const phaseConfig: Record<
-  LoopPhase,
-  { icon: React.ComponentType<{ className?: string }>; color: string; glowColor: string }
-> = {
-  think: { icon: Brain, color: "#22d3ee", glowColor: "rgba(34,211,238,0.4)" },
-  act: { icon: Wrench, color: "#fbbf24", glowColor: "rgba(251,191,36,0.4)" },
-  observe: { icon: Eye, color: "#34d399", glowColor: "rgba(52,211,153,0.4)" },
-  end: { icon: Flag, color: "#818cf8", glowColor: "rgba(129,140,248,0.4)" },
-};
+import { phaseConfig } from "./phaseConfig";
+import type { PhaseNodeData } from "./phaseConfig";
 
 const PhaseNode = memo(({ data }: NodeProps) => {
   const nodeData = data as unknown as PhaseNodeData;
@@ -31,44 +14,43 @@ const PhaseNode = memo(({ data }: NodeProps) => {
       className="relative"
       animate={
         nodeData.isActive
-          ? { scale: [1, 1.08, 1], transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" } }
+          ? { scale: [1, 1.06, 1], transition: { repeat: Infinity, duration: 2, ease: "easeInOut" } }
           : { scale: 1 }
       }
     >
-      {/* Glow effect */}
       {nodeData.isActive && (
         <motion.div
-          className="absolute inset-0 rounded-2xl blur-xl"
+          className="absolute inset-0 rounded-3xl blur-2xl"
           style={{ backgroundColor: config.glowColor }}
-          animate={{ opacity: [0.4, 0.7, 0.4] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+          animate={{ opacity: [0.3, 0.55, 0.3] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         />
       )}
 
       <div
-        className="relative flex flex-col items-center justify-center gap-2 rounded-2xl px-6 py-4 min-w-[120px] border z-10"
+        className="relative flex flex-col items-center justify-center gap-2.5 rounded-3xl px-7 py-5 min-w-[130px] border backdrop-blur-md z-10 transition-colors duration-500 ease-out"
         style={{
-          backgroundColor: nodeData.isActive ? `${config.color}15` : nodeData.isCompleted ? `${config.color}10` : "#1a1a24",
-          borderColor: nodeData.isActive ? config.color : nodeData.isCompleted ? `${config.color}50` : "#313145",
-          boxShadow: nodeData.isActive ? `0 0 20px ${config.glowColor}` : "none",
+          backgroundColor: nodeData.isActive ? `${config.color}12` : nodeData.isCompleted ? `${config.color}0a` : "#1c1c1e",
+          borderColor: nodeData.isActive ? `${config.color}60` : nodeData.isCompleted ? `${config.color}25` : "rgba(255,255,255,0.08)",
+          boxShadow: nodeData.isActive ? `0 0 30px ${config.glowColor}` : "none",
         }}
       >
-        <Handle type="target" position={Position.Top} className="!bg-surface-500" />
+        <Handle type="target" position={Position.Top} className="!bg-white/20" />
         <div
           style={{
             color: config.color,
-            opacity: nodeData.isCompleted && !nodeData.isActive ? 0.7 : 1,
+            opacity: nodeData.isCompleted && !nodeData.isActive ? 0.6 : 1,
           }}
         >
-          <Icon className="h-6 w-6" />
+          <Icon className="h-7 w-7" />
         </div>
         <span
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: nodeData.isActive ? config.color : nodeData.isCompleted ? `${config.color}90` : "#6b7280" }}
+          className="text-xs font-semibold tracking-wider"
+          style={{ color: nodeData.isActive ? config.color : nodeData.isCompleted ? `${config.color}80` : "rgba(255,255,255,0.35)" }}
         >
           {nodeData.label}
         </span>
-        <Handle type="source" position={Position.Bottom} className="!bg-surface-500" />
+        <Handle type="source" position={Position.Bottom} className="!bg-white/20" />
       </div>
     </motion.div>
   );
@@ -76,5 +58,4 @@ const PhaseNode = memo(({ data }: NodeProps) => {
 
 PhaseNode.displayName = "PhaseNode";
 
-export { PhaseNode, phaseConfig };
-export type { PhaseNodeData };
+export { PhaseNode };

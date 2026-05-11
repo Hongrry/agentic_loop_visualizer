@@ -77,7 +77,7 @@ export async function executeToolCall(toolCall: ToolCall): Promise<Record<string
   const handler = toolHandlers[name];
 
   if (!handler) {
-    throw new Error(`Unknown tool: ${name}`);
+    throw new Error(`未知工具: ${name}`);
   }
 
   let args: Record<string, unknown>;

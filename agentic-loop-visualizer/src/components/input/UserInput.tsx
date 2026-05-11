@@ -82,12 +82,12 @@ export function UserInput() {
           {isRunning ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Running
+              运行中...
             </>
           ) : (
             <>
               <Send className="h-4 w-4" />
-              Run
+              运行
             </>
           )}
         </Button>
@@ -99,18 +99,18 @@ export function UserInput() {
           disabled={isRunning}
           className="shrink-0"
         >
-          Reset
+          重置
         </Button>
       </form>
 
-      {/* Example prompts */}
       {(status === "idle" || status === "completed") && (
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="flex flex-wrap gap-2"
         >
-          <span className="flex items-center gap-1 text-xs text-slate-500 mr-1">
+          <span className="flex items-center gap-1 text-xs text-white/35 mr-1">
             <Sparkles className="h-3 w-3" />
             示例:
           </span>
@@ -119,7 +119,7 @@ export function UserInput() {
               key={prompt}
               type="button"
               onClick={() => handleExampleClick(prompt)}
-              className="text-xs text-slate-400 hover:text-slate-200 bg-surface-700/50 hover:bg-surface-600/50 px-2.5 py-1 rounded-full border border-surface-500/30 transition-colors"
+              className="text-xs text-white/45 hover:text-white/80 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-full border border-white/8 transition-all duration-300 ease-out"
             >
               {prompt.length > 24 ? prompt.slice(0, 24) + "..." : prompt}
             </button>

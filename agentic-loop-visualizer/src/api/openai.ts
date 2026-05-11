@@ -1,4 +1,4 @@
-import type { ApiRequest, ApiResponse, ToolDefinition, StreamChunk, AccumulatedToolCall } from "@/types/runtime";
+import type { ApiRequest, ApiResponse, StreamChunk, AccumulatedToolCall } from "@/types/runtime";
 
 const BASE_URL = import.meta.env.VITE_OPENAI_BASE_URL ?? "https://api.openai.com/v1";
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY ?? "";
@@ -34,7 +34,7 @@ export async function callOpenAI(request: ApiRequest): Promise<ApiResponse> {
   });
 
   if (!response.ok) {
-    const errorBody = await response.text().catch(() => "Unknown error");
+    const errorBody = await response.text().catch(() => "未知错误");
     if (response.status === 429) {
       throw new Error("API Rate Limit 已达到，请稍后重试。");
     }
@@ -86,7 +86,7 @@ export async function callOpenAIStream(
   });
 
   if (!response.ok) {
-    const errorBody = await response.text().catch(() => "Unknown error");
+    const errorBody = await response.text().catch(() => "未知错误");
     if (response.status === 429) {
       throw new Error("API Rate Limit 已达到，请稍后重试。");
     }

@@ -237,7 +237,7 @@ export async function runAgenticLoop(
       const actStep: LoopStep = {
         id: nextStepId(),
         phase: "act",
-        title: `执行 Tool 调用: ${toolCall.function.name}`,
+        title: `执行工具调用: ${toolCall.function.name}`,
         toolName: toolCall.function.name,
         toolInput,
         contextBefore: [...contextHistory],
@@ -251,7 +251,7 @@ export async function runAgenticLoop(
         toolOutput = await executeToolCall(toolCall);
       } catch (err) {
         toolOutput = {
-          error: err instanceof Error ? err.message : "Tool 执行失败",
+          error: err instanceof Error ? err.message : "工具执行失败",
         };
       }
 
@@ -273,7 +273,7 @@ export async function runAgenticLoop(
       const observeStep: LoopStep = {
         id: nextStepId(),
         phase: "observe",
-        title: "Tool 结果注入上下文",
+        title: "工具结果注入上下文",
         contextBefore: prevContext,
         contextAfter: afterContext,
         newContext: newContextEntries,

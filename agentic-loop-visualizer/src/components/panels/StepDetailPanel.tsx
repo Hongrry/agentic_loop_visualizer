@@ -35,6 +35,13 @@ const phaseBadgeVariant = {
   end: "end" as const,
 };
 
+const phaseBadgeLabel: Record<string, string> = {
+  think: "思考",
+  act: "执行",
+  observe: "观察",
+  end: "结束",
+};
+
 function ThinkContent({ step }: { step: LoopStep }) {
   const status = useRuntimeStore((s) => s.status);
   const isStreaming = status === "running";
@@ -43,12 +50,13 @@ function ThinkContent({ step }: { step: LoopStep }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="space-y-5"
     >
       {step.goal && (
         <div>
           <Label>当前目标</Label>
-          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-200 border border-surface-500/30">
+          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/80 border border-white/5">
             {step.goal}
           </div>
         </div>
@@ -56,7 +64,7 @@ function ThinkContent({ step }: { step: LoopStep }) {
       {step.decision && (
         <div>
           <Label>决策</Label>
-          <div className="mt-1 flex items-center gap-2 rounded-lg bg-glow-amber/10 p-3 text-sm text-glow-amber border border-glow-amber/20">
+          <div className="mt-1.5 flex items-center gap-2 rounded-xl bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15">
             <ChevronRight className="h-4 w-4 shrink-0" />
             {step.decision}
           </div>
@@ -77,13 +85,13 @@ function ThinkContent({ step }: { step: LoopStep }) {
               </span>
             )}
           </div>
-          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-300 font-mono leading-relaxed border border-surface-500/30 max-h-60 overflow-y-auto whitespace-pre-wrap">
+          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap">
             {step.thought}
           </div>
         </div>
       )}
       {step.duration !== undefined && step.duration > 0 && !isStreaming && (
-        <div className="flex items-center gap-1 text-xs text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-white/35">
           <Clock className="h-3 w-3" />
           耗时: {step.duration}ms
         </div>
@@ -97,18 +105,19 @@ function ActContent({ step }: { step: LoopStep }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="space-y-5"
     >
       <div>
-        <Label>Tool 名称</Label>
-        <div className="mt-1 rounded-lg bg-glow-amber/10 p-3 text-sm text-glow-amber border border-glow-amber/20 font-mono">
+        <Label>工具名称</Label>
+        <div className="mt-1.5 rounded-xl bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15 font-mono">
           {step.toolName ?? "未知"}
         </div>
       </div>
       {step.toolInput && (
         <div>
           <Label>输入参数</Label>
-          <pre className="mt-1 rounded-lg bg-surface-700/50 p-3 text-xs text-slate-300 font-mono leading-relaxed border border-surface-500/30 overflow-x-auto">
+          <pre className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-xs text-white/70 font-mono leading-relaxed border border-white/5 overflow-x-auto">
             {JSON.stringify(step.toolInput, null, 2)}
           </pre>
         </div>
@@ -117,21 +126,21 @@ function ActContent({ step }: { step: LoopStep }) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
         >
           <Label>执行结果</Label>
-          <pre className="mt-1 rounded-lg bg-glow-green/10 p-3 text-xs text-glow-green font-mono leading-relaxed border border-glow-green/20 overflow-x-auto">
+          <pre className="mt-1.5 rounded-xl bg-glow-green/8 p-4 text-xs text-glow-green font-mono leading-relaxed border border-glow-green/15 overflow-x-auto">
             {JSON.stringify(step.toolOutput, null, 2)}
           </pre>
         </motion.div>
       ) : (
         <div className="flex items-center gap-2 text-sm text-glow-amber">
           <Loader2 className="h-4 w-4 animate-spin" />
-          正在执行 {step.toolName ?? "tool"}...
+          正在执行 {step.toolName ?? "工具"}...
         </div>
       )}
       {step.duration !== undefined && step.duration > 0 && (
-        <div className="flex items-center gap-1 text-xs text-slate-500">
+        <div className="flex items-center gap-1.5 text-xs text-white/35">
           <Clock className="h-3 w-3" />
           耗时: {step.duration}ms
         </div>
@@ -145,7 +154,8 @@ function ObserveContent({ step }: { step: LoopStep }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="space-y-5"
     >
       <div>
         <Label>上下文更新前</Label>
@@ -155,17 +165,17 @@ function ObserveContent({ step }: { step: LoopStep }) {
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.2, duration: 0.35, ease: "easeOut" }}
         >
           <Label>新增上下文</Label>
-          <div className="mt-1 space-y-1">
+          <div className="mt-1.5 space-y-1.5">
             {step.newContext.map((ctx, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
-                className="rounded-lg bg-glow-green/10 p-2 text-sm text-glow-green border border-glow-green/20 font-mono"
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.3, ease: "easeOut" }}
+                className="rounded-xl bg-glow-green/8 p-3 text-sm text-glow-green border border-glow-green/15 font-mono"
               >
                 + {ctx}
               </motion.div>
@@ -176,7 +186,7 @@ function ObserveContent({ step }: { step: LoopStep }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.4, duration: 0.35, ease: "easeOut" }}
       >
         <Label>上下文更新后</Label>
         <ContextList items={step.contextAfter} />
@@ -190,23 +200,24 @@ function EndContent({ step }: { step: LoopStep }) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="space-y-5"
     >
       <div>
         <Label>最终答案</Label>
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mt-1 rounded-lg bg-accent-500/10 p-4 text-sm text-slate-100 border border-accent-500/30 leading-relaxed whitespace-pre-wrap"
+          transition={{ delay: 0.2, duration: 0.4, ease: "easeOut" }}
+          className="mt-1.5 rounded-xl bg-accent-500/8 p-4 text-sm text-white/85 border border-accent-500/20 leading-relaxed whitespace-pre-wrap"
         >
-          {step.finalAnswer ?? "无最终答案"}
+          {step.finalAnswer ?? "暂无最终答案"}
         </motion.div>
       </div>
       {step.thought && (
         <div>
           <Label>执行总结</Label>
-          <div className="mt-1 rounded-lg bg-surface-700/50 p-3 text-sm text-slate-300 border border-surface-500/30">
+          <div className="mt-1.5 rounded-xl bg-white/[0.04] p-4 text-sm text-white/70 border border-white/5">
             {step.thought}
           </div>
         </div>
@@ -218,17 +229,17 @@ function EndContent({ step }: { step: LoopStep }) {
 function ContextList({ items }: { items: string[] }) {
   if (items.length === 0) {
     return (
-      <div className="mt-1 rounded-lg bg-surface-700/30 p-3 text-sm text-slate-500 border border-surface-500/20 italic">
+      <div className="mt-1.5 rounded-xl bg-white/[0.02] p-4 text-sm text-white/30 border border-white/5 italic">
         暂无上下文
       </div>
     );
   }
   return (
-    <ul className="mt-1 space-y-1">
+    <ul className="mt-1.5 space-y-1">
       {items.map((item, i) => (
         <li
           key={i}
-          className="rounded-lg bg-surface-700/30 p-2 text-sm text-slate-400 border border-surface-500/20 font-mono text-xs"
+          className="rounded-xl bg-white/[0.02] p-3 text-sm text-white/50 border border-white/5 font-mono text-xs"
         >
           {item}
         </li>
@@ -238,7 +249,7 @@ function ContextList({ items }: { items: string[] }) {
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{children}</div>;
+  return <div className="text-xs font-semibold text-white/40 uppercase tracking-wider">{children}</div>;
 }
 
 export function StepDetailPanel() {
@@ -253,11 +264,11 @@ export function StepDetailPanel() {
     return (
       <Card className="h-full flex flex-col">
         <CardHeader>
-          <CardTitle>Step Detail</CardTitle>
+          <CardTitle>步骤详情</CardTitle>
         </CardHeader>
         <CardContent className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-slate-500 text-center">
-            输入您的问题并点击 Run<br />开始查看 Agent 运行详情
+          <p className="text-sm text-white/30 text-center leading-relaxed">
+            输入您的问题并点击运行<br />开始查看智能体运行详情
           </p>
         </CardContent>
       </Card>
@@ -267,7 +278,7 @@ export function StepDetailPanel() {
   if (status === "error") {
     const errorMsg = useRuntimeStore.getState().error;
     return (
-      <Card className="h-full flex flex-col border-glow-rose/30">
+      <Card className="h-full flex flex-col border-glow-rose/20">
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-glow-rose" />
@@ -275,7 +286,7 @@ export function StepDetailPanel() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg bg-glow-rose/10 p-4 text-sm text-glow-rose border border-glow-rose/20">
+          <div className="rounded-xl bg-glow-rose/8 p-4 text-sm text-glow-rose border border-glow-rose/15">
             {errorMsg ?? "发生未知错误"}
           </div>
         </CardContent>
@@ -293,16 +304,16 @@ export function StepDetailPanel() {
                 key={currentStep.phase + currentStep.id}
                 initial={{ rotate: -90, opacity: 0 }}
                 animate={{ rotate: 0, opacity: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 <PhaseIcon className={`h-4 w-4 ${phaseColors[currentStep.phase]}`} />
               </motion.div>
             </AnimatePresence>
           )}
-          <CardTitle>{currentStep?.title ?? "Step Detail"}</CardTitle>
+          <CardTitle>{currentStep?.title ?? "步骤详情"}</CardTitle>
           {currentStep && (
             <Badge variant={phaseBadgeVariant[currentStep.phase]}>
-              {currentStep.phase.toUpperCase()}
+              {phaseBadgeLabel[currentStep.phase]}
             </Badge>
           )}
         </div>
@@ -314,7 +325,7 @@ export function StepDetailPanel() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {currentStep?.phase === "think" && <ThinkContent step={currentStep} />}
             {currentStep?.phase === "act" && <ActContent step={currentStep} />}

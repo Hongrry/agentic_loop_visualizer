@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface-900: #0a0a0f;
-  --color-surface-800: #111118;
-  --color-surface-700: #1a1a24;
-  --color-surface-600: #252532;
-  --color-surface-500: #313145;
-  --color-accent-500: #6366f1;
-  --color-accent-400: #818cf8;
-  --color-accent-300: #a5b4fc;
-  --color-glow-cyan: #22d3ee;
-  --color-glow-green: #34d399;
-  --color-glow-amber: #fbbf24;
-  --color-glow-rose: #fb7185;
+  --color-surface-900: #000000;
+  --color-surface-800: #1c1c1e;
+  --color-surface-700: #2c2c2e;
+  --color-surface-600: #3a3a3c;
+  --color-surface-500: #48484a;
+  --color-accent-500: #0a84ff;
+  --color-accent-400: #409cff;
+  --color-accent-300: #70b5ff;
+  --color-glow-cyan: #5ac8fa;
+  --color-glow-green: #30d158;
+  --color-glow-amber: #ff9f0a;
+  --color-glow-rose: #ff453a;
 }
 
 * {
@@ -29,8 +29,10 @@ html, body, #root {
 
 body {
   background-color: var(--color-surface-900);
-  color: #e2e8f0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #f5f5f7;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .react-flow__background {
@@ -40,7 +42,8 @@ body {
 .react-flow__controls button {
   background-color: var(--color-surface-600) !important;
   border-color: var(--color-surface-500) !important;
-  color: #e2e8f0 !important;
+  color: #f5f5f7 !important;
+  border-radius: 8px !important;
 }
 
 .react-flow__controls button:hover {
@@ -49,22 +52,23 @@ body {
 
 .react-flow__minimap {
   background-color: var(--color-surface-700) !important;
+  border-radius: 12px !important;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-surface-800);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-surface-500);
-  border-radius: 3px;
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent-500);
+  background: var(--color-surface-600);
 }

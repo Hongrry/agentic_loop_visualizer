@@ -30,11 +30,12 @@ const phaseColors: Record<LoopPhase, string> = {
   end: "text-accent-400",
 };
 
-const phaseBadgeVariant: Record<LoopPhase, "think" | "act" | "observe" | "end"> = {
-  think: "think",
-  act: "act",
-  observe: "observe",
-  end: "end",
+const statusLabels: Record<string, string> = {
+  running: "运行中",
+  completed: "已完成",
+  error: "出错",
+  paused: "已暂停",
+  idle: "空闲",
 };
 
 function StepDot({
@@ -57,60 +58,57 @@ function StepDot({
     <motion.button
       onClick={onClick}
       className="flex flex-col items-center gap-1 min-w-[48px] shrink-0 cursor-pointer group"
-      whileHover={{ scale: 1.08 }}
+      whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.95 }}
       animate={
         isCurrent
           ? {
-              scale: [1, 1.05, 1],
-              transition: { repeat: Infinity, duration: 1.2, ease: "easeInOut" },
+              scale: [1, 1.04, 1],
+              transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" },
             }
           : {}
       }
     >
-      {/* Step number */}
-      <span className="text-[10px] text-slate-500 font-mono">[{index + 1}]</span>
+      <span className="text-[10px] text-white/30 font-mono">[{index + 1}]</span>
 
-      {/* Icon dot */}
       <motion.div
         className="relative flex items-center justify-center"
         animate={
           isCurrent
             ? {
                 boxShadow: [
-                  "0 0 8px rgba(99,102,241,0.3)",
-                  "0 0 16px rgba(99,102,241,0.6)",
-                  "0 0 8px rgba(99,102,241,0.3)",
+                  "0 0 8px rgba(10,132,255,0.2)",
+                  "0 0 16px rgba(10,132,255,0.4)",
+                  "0 0 8px rgba(10,132,255,0.2)",
                 ],
               }
             : {}
         }
-        transition={{ repeat: Infinity, duration: 1.2 }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
       >
         <div
-          className={`h-9 w-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+          className={`h-9 w-9 rounded-full flex items-center justify-center transition-all duration-500 ease-out ${
             isCurrent
-              ? "bg-accent-500/20 ring-2 ring-accent-500 ring-offset-2 ring-offset-surface-800"
+              ? "bg-accent-500/15 ring-2 ring-accent-500/50 ring-offset-2 ring-offset-surface-900"
               : isPast
-                ? "bg-surface-600"
-                : "bg-surface-700 opacity-50"
+                ? "bg-white/10"
+                : "bg-white/[0.03] opacity-50"
           }`}
         >
           <Icon
             className={`h-4 w-4 ${color} ${
-              isPast && !isCurrent ? "opacity-70" : isCurrent ? "" : "opacity-40"
+              isPast && !isCurrent ? "opacity-60" : isCurrent ? "" : "opacity-35"
             }`}
           />
         </div>
       </motion.div>
 
-      {/* Phase label */}
       <span
-        className={`text-[10px] font-medium uppercase tracking-wider transition-colors ${
-          isCurrent ? color : isPast ? "text-slate-400" : "text-slate-600"
+        className={`text-[10px] font-medium uppercase tracking-wider transition-colors duration-500 ${
+          isCurrent ? color : isPast ? "text-white/50" : "text-white/25"
         }`}
       >
-        {step.phase}
+        {step.phase === "think" ? "思考" : step.phase === "act" ? "执行" : step.phase === "observe" ? "观察" : "结束"}
       </span>
     </motion.button>
   );
@@ -131,7 +129,6 @@ export function TimelinePlayer() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to current step
   useEffect(() => {
     if (scrollRef.current) {
       const activeEl = scrollRef.current.querySelector(`[data-step-index="${currentStepIndex}"]`);
@@ -141,7 +138,6 @@ export function TimelinePlayer() {
     }
   }, [currentStepIndex]);
 
-  const isRunning = status === "running";
   const isCompleted = status === "completed";
   const hasSteps = steps.length > 0;
   const canPrev = currentStepIndex > 0;
@@ -149,8 +145,7 @@ export function TimelinePlayer() {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Controls */}
-      <div className="flex items-center gap-2 px-1">
+      <div className="flex items-center gap-1.5 px-1">
         <Button
           variant="ghost"
           size="icon"
@@ -168,7 +163,6 @@ export function TimelinePlayer() {
           title="回放"
         >
           <RotateCcw className="h-4 w-4" />
-          <span className="text-[10px] ml-0.5">Replay</span>
         </Button>
         <Button
           variant="ghost"
@@ -198,7 +192,6 @@ export function TimelinePlayer() {
           <SkipForward className="h-4 w-4" />
         </Button>
 
-        {/* Status badge */}
         <div className="ml-auto">
           <Badge
             variant={
@@ -211,16 +204,11 @@ export function TimelinePlayer() {
                     : "default"
             }
           >
-            {status === "running" && "RUNNING"}
-            {status === "completed" && "COMPLETED"}
-            {status === "error" && "ERROR"}
-            {status === "paused" && "PAUSED"}
-            {status === "idle" && "IDLE"}
+            {statusLabels[status] ?? status}
           </Badge>
         </div>
       </div>
 
-      {/* Timeline track */}
       <div
         ref={scrollRef}
         className="flex items-center gap-1 overflow-x-auto px-1 pb-2 scrollbar-thin"
@@ -234,7 +222,7 @@ export function TimelinePlayer() {
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.25, delay: index * 0.05 }}
+              transition={{ duration: 0.3, delay: index * 0.05, ease: "easeOut" }}
               className="flex items-center gap-1"
             >
               <StepDot
@@ -244,15 +232,14 @@ export function TimelinePlayer() {
                 isPast={index < currentStepIndex}
                 onClick={() => useRuntimeStore.setState({ currentStepIndex: index })}
               />
-              {/* Connector line between steps */}
               {index < steps.length - 1 && (
                 <motion.div
                   className={`h-px w-4 shrink-0 ${
-                    index < currentStepIndex ? "bg-accent-500/40" : "bg-surface-500/30"
+                    index < currentStepIndex ? "bg-accent-500/30" : "bg-white/8"
                   }`}
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.1 }}
+                  transition={{ delay: 0.1, duration: 0.3, ease: "easeOut" }}
                 />
               )}
             </motion.div>
@@ -261,7 +248,7 @@ export function TimelinePlayer() {
 
         {!hasSteps && (
           <div className="flex-1 flex items-center justify-center py-4">
-            <p className="text-xs text-slate-600">等待 Agent 执行...</p>
+            <p className="text-xs text-white/20">等待智能体执行...</p>
           </div>
         )}
       </div>
