@@ -158,6 +158,14 @@ export async function runAgenticLoop(
       return steps;
     }
 
+    // Push assistant message once (with all tool_calls) before processing individual tools
+    const assistantMsg = buildAssistantToolCallMessage(
+      apiResponse.content ?? null,
+      apiResponse.tool_calls,
+      apiResponse.reasoning_content ?? null
+    );
+    messages.push(assistantMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string; reasoning_content?: string });
+
     // --- ACT phase for each tool call ---
     for (const toolCall of apiResponse.tool_calls) {
       const actStart = Date.now();
@@ -219,14 +227,6 @@ export async function runAgenticLoop(
       onStep(observeStep);
 
       contextHistory.push(...newContextEntries);
-
-      // Add tool result to messages for next iteration
-      const assistantMsg = buildAssistantToolCallMessage(
-        apiResponse.content ?? null,
-        apiResponse.tool_calls,
-        apiResponse.reasoning_content ?? null
-      );
-      messages.push(assistantMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string; reasoning_content?: string });
 
       const toolMsg = buildToolMessage(toolCall.id, toolOutput);
       messages.push(toolMsg as unknown as { role: string; content: string; tool_calls?: unknown[]; tool_call_id?: string });
