@@ -15,7 +15,7 @@ import { AnimatedEdge } from "./AnimatedEdge";
 import type { AnimatedEdgeData } from "./AnimatedEdge";
 import { useRuntimeStore } from "@/store/runtimeStore";
 import { phaseConfig } from "./phaseConfig";
-import type { LoopPhase } from "@/types/runtime";
+import type { LoopPhase, LoopStep } from "@/types/runtime";
 
 const nodeTypes = { phaseNode: PhaseNode };
 const edgeTypes = { animated: AnimatedEdge };
