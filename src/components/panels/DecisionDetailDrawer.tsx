@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import type { RoundGroup } from "@/components/panels/DecisionTrail";
+import { MarkdownContent } from "@/components/ui/MarkdownContent";
 
 type DecisionDetailDrawerProps = {
   groups: RoundGroup[];
@@ -106,9 +107,11 @@ export function DecisionDetailDrawer({
             <span className="text-[10px] font-semibold text-white/25 uppercase tracking-wider">
               本轮目标
             </span>
-            <p className="text-sm text-white/70 mt-2 whitespace-pre-wrap leading-relaxed">
-              {thinkStep?.goal || thinkStep?.decision || endStep?.decision || "未设定"}
-            </p>
+            <div className="mt-2">
+              <MarkdownContent>
+                {thinkStep?.goal || thinkStep?.decision || endStep?.decision || null}
+              </MarkdownContent>
+            </div>
           </div>
 
           {/* 区块2: 模型推理过程 */}
@@ -117,9 +120,11 @@ export function DecisionDetailDrawer({
               模型推理过程
             </span>
             {hasReasoningContent ? (
-              <pre className="mt-2 p-3 rounded-lg bg-surface-900/50 border border-white/5 text-xs text-white/60 whitespace-pre-wrap font-mono leading-relaxed max-h-48 overflow-y-auto">
-                {thinkStep!.apiResponse!.reasoning_content}
-              </pre>
+              <div className="mt-2 max-h-48 overflow-y-auto">
+                <MarkdownContent>
+                  {thinkStep!.apiResponse!.reasoning_content}
+                </MarkdownContent>
+              </div>
             ) : (
               <p className="text-xs text-white/30 mt-2">无推理内容</p>
             )}
@@ -176,17 +181,21 @@ export function DecisionDetailDrawer({
               {(thinkStep?.decision || endStep?.decision) && (
                 <div>
                   <span className="text-[10px] text-white/20">决策</span>
-                  <p className="text-sm text-white/70 mt-1 leading-relaxed">
-                    {thinkStep?.decision ?? endStep?.decision}
-                  </p>
+                  <div className="mt-1">
+                    <MarkdownContent>
+                      {thinkStep?.decision ?? endStep?.decision ?? null}
+                    </MarkdownContent>
+                  </div>
                 </div>
               )}
               {selectedGroup.decisionReason && (
                 <div>
                   <span className="text-[10px] text-white/20">决策原因</span>
-                  <p className="text-sm text-white/60 mt-1 leading-relaxed">
-                    {selectedGroup.decisionReason}
-                  </p>
+                  <div className="mt-1">
+                    <MarkdownContent>
+                      {selectedGroup.decisionReason}
+                    </MarkdownContent>
+                  </div>
                 </div>
               )}
               {thinkStep?.apiResponse?.finish_reason && (

@@ -74,3 +74,114 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-surface-600);
 }
+
+/* ---- Markdown content styling ---- */
+.markdown-content {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+}
+
+.markdown-content h1 { font-size: 1.2rem; }
+.markdown-content h2 { font-size: 1.1rem; }
+.markdown-content h3 { font-size: 1rem; }
+.markdown-content h4 { font-size: 0.9rem; }
+
+.markdown-content p {
+  margin-bottom: 0.5em;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.5em;
+}
+
+.markdown-content li {
+  margin-bottom: 0.15em;
+}
+
+.markdown-content strong {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.markdown-content em {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.markdown-content a {
+  color: var(--color-accent-400);
+  text-decoration: underline;
+}
+
+.markdown-content blockquote {
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+  padding-left: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5em;
+}
+
+.markdown-content :not(pre) > code {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  font-size: 0.8rem;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+}
+
+.markdown-content pre {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  margin-bottom: 0.5em;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.markdown-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 0.5em;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.35em 0.6em;
+  text-align: left;
+}
+
+.markdown-content th {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0.75em 0;
+}

@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { MarkdownContent } from "@/components/ui/MarkdownContent";
 import { useRuntimeStore } from "@/store/runtimeStore";
 import type { LoopStep } from "@/types/runtime";
 
@@ -63,17 +64,19 @@ function ThinkContent({ step }: { step: LoopStep }) {
       {step.goal && (
         <div>
           <Label>当前目标</Label>
-          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/80 border border-white/5">
-            {step.goal}
+          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 border border-white/5">
+            <MarkdownContent>{step.goal}</MarkdownContent>
           </div>
         </div>
       )}
       {step.decision && (
         <div>
           <Label>决策</Label>
-          <div className="mt-1.5 flex items-center gap-2 rounded-lg bg-glow-amber/8 p-4 text-sm text-glow-amber border border-glow-amber/15">
-            <ChevronRight className="h-4 w-4 shrink-0" />
-            {step.decision}
+          <div className="mt-1.5 rounded-lg bg-glow-amber/8 p-4 border border-glow-amber/15">
+            <div className="flex items-start gap-2">
+              <ChevronRight className="h-4 w-4 shrink-0 mt-0.5 text-glow-amber" />
+              <MarkdownContent>{step.decision}</MarkdownContent>
+            </div>
           </div>
         </div>
       )}
@@ -94,9 +97,9 @@ function ThinkContent({ step }: { step: LoopStep }) {
           </div>
           <div
             ref={thoughtRef}
-            className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 font-mono leading-relaxed border border-white/5 max-h-60 overflow-y-auto whitespace-pre-wrap"
+            className="mt-1.5 rounded-lg bg-white/[0.04] p-4 border border-white/5 max-h-60 overflow-y-auto"
           >
-            {step.thought}
+            <MarkdownContent>{step.thought}</MarkdownContent>
           </div>
         </div>
       )}
@@ -219,16 +222,16 @@ function EndContent({ step }: { step: LoopStep }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4, ease: "easeOut" }}
-          className="mt-1.5 rounded-lg bg-accent-500/8 p-4 text-sm text-white/85 border border-accent-500/20 leading-relaxed whitespace-pre-wrap"
+          className="mt-1.5 rounded-lg bg-accent-500/8 p-4 border border-accent-500/20"
         >
-          {step.finalAnswer ?? "暂无最终答案"}
+          <MarkdownContent>{step.finalAnswer ?? null}</MarkdownContent>
         </motion.div>
       </div>
       {step.thought && (
         <div>
           <Label>执行总结</Label>
-          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 text-sm text-white/70 border border-white/5">
-            {step.thought}
+          <div className="mt-1.5 rounded-lg bg-white/[0.04] p-4 border border-white/5">
+            <MarkdownContent>{step.thought}</MarkdownContent>
           </div>
         </div>
       )}
