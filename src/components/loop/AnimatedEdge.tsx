@@ -29,10 +29,10 @@ const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosit
       markerEnd={markerEnd}
       markerStart={markerStart}
       style={{
-        stroke: isActive ? color : "rgba(255,255,255,0.08)",
-        strokeWidth: 2,
+        stroke: isActive ? color : "rgba(255,255,255,0.22)",
+        strokeWidth: isActive ? 2 : 1.5,
         strokeDasharray: dashed ? "6 4" : undefined,
-        opacity: isActive ? 0.6 : 0.25,
+        opacity: isActive ? 0.7 : 0.45,
         transition: "stroke 0.7s ease, opacity 0.7s ease",
       }}
     />

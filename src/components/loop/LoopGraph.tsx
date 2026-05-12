@@ -15,16 +15,7 @@ import { AnimatedEdge } from "./AnimatedEdge";
 import type { AnimatedEdgeData } from "./AnimatedEdge";
 import { useRuntimeStore } from "@/store/runtimeStore";
 import { phaseConfig } from "./phaseConfig";
-import type { LoopPhase, LoopStep } from "@/types/runtime";
-
-function hasDirectThinkToEnd(steps: LoopStep[]): boolean {
-  for (let i = 1; i < steps.length; i++) {
-    if (steps[i].phase === "end" && steps[i - 1].phase === "think") {
-      return true;
-    }
-  }
-  return false;
-}
+import type { LoopPhase } from "@/types/runtime";
 
 const nodeTypes = { phaseNode: PhaseNode };
 const edgeTypes = { animated: AnimatedEdge };
@@ -127,22 +118,21 @@ export function LoopGraph() {
       },
     });
 
-    // observe → end (bottom → left)
+    // think → end (常驻直接出口)
     edgeList.push({
-      id: "e-observe-end",
-      source: "observe",
+      id: "e-think-end-direct",
+      source: "think",
       target: "end",
       type: "animated",
       sourceHandle: "s-left",
-      targetHandle: "t-bottom",
-      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
+      targetHandle: "t-top",
+      markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.end.color, width: 16, height: 16 },
       data: {
-        isActive: completedPhases.has("observe") && currentPhase === "end" && running,
-        color: phaseConfig.observe.color,
+        isActive: completedPhases.has("think") && currentPhase === "end" && running,
+        color: phaseConfig.end.color,
+        dashed: true,
       },
     });
-
-    // observe → think (loop back)
     edgeList.push({
       id: "e-observe-think-loop",
       source: "observe",
@@ -158,26 +148,8 @@ export function LoopGraph() {
       style: { strokeDasharray: "6 4" },
     });
 
-    // think → end (direct exit when no tool calls)
-    if (hasDirectThinkToEnd(steps)) {
-      edgeList.push({
-        id: "e-think-end-direct",
-        source: "think",
-        target: "end",
-        type: "animated",
-        sourceHandle: "s-left",
-        targetHandle: "t-top",
-        markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.end.color, width: 16, height: 16 },
-        data: {
-          isActive: completedPhases.has("think") && currentPhase === "end" && running,
-          color: phaseConfig.end.color,
-          dashed: true,
-        },
-      });
-    }
-
     return edgeList;
-  }, [currentPhase, completedPhases, status, steps]);
+  }, [currentPhase, completedPhases, status]);
 
   const proOptions = { hideAttribution: true };
 
