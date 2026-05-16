@@ -12,7 +12,7 @@ export function getApiConfig() {
   };
 }
 
-export async function callOpenAI(request: ApiRequest): Promise<ApiResponse> {
+export async function callOpenAI(request: ApiRequest, signal?: AbortSignal): Promise<ApiResponse> {
   if (!API_KEY) {
     throw new Error(
       "未配置 OpenAI API Key。请在项目根目录创建 .env 文件并设置 VITE_OPENAI_API_KEY=sk-xxx"
@@ -31,6 +31,7 @@ export async function callOpenAI(request: ApiRequest): Promise<ApiResponse> {
       tools: request.tools,
       tool_choice: "auto",
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -61,7 +62,8 @@ export async function callOpenAI(request: ApiRequest): Promise<ApiResponse> {
 
 export async function callOpenAIStream(
   request: ApiRequest,
-  onChunk: (chunk: StreamChunk) => void
+  onChunk: (chunk: StreamChunk) => void,
+  signal?: AbortSignal
 ): Promise<ApiResponse> {
   if (!API_KEY) {
     throw new Error(
@@ -83,6 +85,7 @@ export async function callOpenAIStream(
       stream: true,
       stream_options: { include_usage: true },
     }),
+    signal,
   });
 
   if (!response.ok) {

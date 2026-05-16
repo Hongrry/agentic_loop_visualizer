@@ -1,9 +1,29 @@
 import { create } from "zustand";
-import type { LoopStep, RuntimeStatus } from "@/types/runtime";
+import type { LoopStep, RuntimeStatus, RuntimeError } from "@/types/runtime";
 import { runAgenticLoop } from "@/api/agentLoop";
 import type { LoopResult } from "@/api/agentLoop";
 
 let playbackInterval: ReturnType<typeof setInterval> | null = null;
+
+function startPlaybackInterval() {
+  const store = useRuntimeStore;
+  store.setState({ playing: true });
+  playbackInterval = setInterval(() => {
+    const state = store.getState();
+    if (!state.playing) {
+      clearInterval(playbackInterval!);
+      playbackInterval = null;
+      return;
+    }
+    if (state.currentStepIndex < state.steps.length - 1) {
+      store.setState({ currentStepIndex: state.currentStepIndex + 1 });
+    } else {
+      store.setState({ playing: false });
+      clearInterval(playbackInterval!);
+      playbackInterval = null;
+    }
+  }, 1000 / store.getState().speed);
+}
 
 type ChatMessage = {
   role: string;
@@ -19,12 +39,14 @@ type RuntimeState = {
   status: RuntimeStatus;
   playing: boolean;
   speed: number;
-  error: string | null;
+  error: RuntimeError | null;
   userInput: string;
   messages: ChatMessage[];
+  abortController: AbortController | null;
 
   setUserInput: (input: string) => void;
   startLoop: () => Promise<void>;
+  cancel: () => void;
   nextStep: () => void;
   previousStep: () => void;
   play: () => void;
@@ -42,20 +64,23 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
   error: null,
   userInput: "",
   messages: [],
+  abortController: null,
 
   setUserInput: (input: string) => {
     set({ userInput: input });
   },
 
   startLoop: async () => {
-    const { userInput, steps: existingSteps, messages: existingMessages } = get();
+    const { userInput, steps: existingSteps, messages: existingMessages, abortController: prevAc } = get();
+    prevAc?.abort();
 
     if (!userInput.trim()) {
-      set({ error: "请输入您的问题。" });
+      set({ error: { code: "unknown", message: "请输入您的问题。", retryable: false } });
       return;
     }
 
-    set({ status: "running", error: null, currentStepIndex: existingSteps.length - 1 });
+    const ac = new AbortController();
+    set({ status: "running", error: null, currentStepIndex: existingSteps.length - 1, abortController: ac });
 
     try {
       const turnSteps: LoopStep[] = [];
@@ -74,25 +99,47 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
             currentStepIndex: mergedSteps.length - 1,
           });
         },
-        existingMessages.length > 0 ? existingMessages : undefined
+        existingMessages.length > 0 ? existingMessages : undefined,
+        ac.signal
       );
-      // Use the final merged steps from result and save messages for next turn
+
+      if (result.error?.code === "abort") {
+        set({ status: "idle", playing: false, abortController: null });
+        return;
+      }
+
       const mergedSteps = [...existingSteps, ...result.steps];
       set({
         steps: mergedSteps,
         currentStepIndex: mergedSteps.length - 1,
         messages: result.messages,
-        status: "completed",
+        status: result.error ? "error" : "completed",
+        error: result.error ?? null,
         playing: false,
+        abortController: null,
       });
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "运行时发生未知错误";
+      if (err instanceof DOMException && err.name === "AbortError") {
+        set({ status: "idle", playing: false, abortController: null });
+        return;
+      }
       set({
         status: "error",
-        error: errorMsg,
+        error: { code: "unknown", message: err instanceof Error ? err.message : "运行时发生未知错误", retryable: true },
         playing: false,
+        abortController: null,
       });
     }
+  },
+
+  cancel: () => {
+    const { abortController } = get();
+    abortController?.abort();
+    if (playbackInterval) {
+      clearInterval(playbackInterval);
+      playbackInterval = null;
+    }
+    set({ status: "idle", playing: false, abortController: null });
   },
 
   nextStep: () => {
@@ -110,27 +157,12 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
   },
 
   play: () => {
-    if (playbackInterval) clearInterval(playbackInterval);
-    const { steps, speed } = get();
+    get().pause();
+    const { steps } = get();
     if (get().currentStepIndex >= steps.length - 1) {
       set({ currentStepIndex: 0 });
     }
-    set({ playing: true });
-    playbackInterval = setInterval(() => {
-      const state = get();
-      if (!state.playing) {
-        clearInterval(playbackInterval!);
-        playbackInterval = null;
-        return;
-      }
-      if (state.currentStepIndex < state.steps.length - 1) {
-        set({ currentStepIndex: state.currentStepIndex + 1 });
-      } else {
-        set({ playing: false });
-        clearInterval(playbackInterval!);
-        playbackInterval = null;
-      }
-    }, 1000 / speed);
+    startPlaybackInterval();
   },
 
   pause: () => {
@@ -142,27 +174,13 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
   },
 
   replay: () => {
-    if (playbackInterval) clearInterval(playbackInterval);
-    set({ currentStepIndex: 0, playing: true });
-    const { speed } = get();
-    playbackInterval = setInterval(() => {
-      const state = get();
-      if (!state.playing) {
-        clearInterval(playbackInterval!);
-        playbackInterval = null;
-        return;
-      }
-      if (state.currentStepIndex < state.steps.length - 1) {
-        set({ currentStepIndex: state.currentStepIndex + 1 });
-      } else {
-        set({ playing: false });
-        clearInterval(playbackInterval!);
-        playbackInterval = null;
-      }
-    }, 1000 / speed);
+    get().pause();
+    set({ currentStepIndex: 0 });
+    startPlaybackInterval();
   },
 
   reset: () => {
+    get().abortController?.abort();
     if (playbackInterval) {
       clearInterval(playbackInterval);
       playbackInterval = null;
@@ -175,6 +193,7 @@ export const useRuntimeStore = create<RuntimeState>((set, get) => ({
       error: null,
       userInput: "",
       messages: [],
+      abortController: null,
     });
   },
 }));

@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { useCallback } from "react";
+import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -14,11 +14,10 @@ const EXAMPLES = [
 ];
 
 export function UserInput() {
-  const [localInput, setLocalInput] = useState("");
-
   const userInput = useRuntimeStore((s) => s.userInput);
   const setUserInput = useRuntimeStore((s) => s.setUserInput);
   const startLoop = useRuntimeStore((s) => s.startLoop);
+  const cancel = useRuntimeStore((s) => s.cancel);
   const reset = useRuntimeStore((s) => s.reset);
   const status = useRuntimeStore((s) => s.status);
 
@@ -27,18 +26,13 @@ export function UserInput() {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      const inputToUse = localInput.trim() || userInput.trim();
-      if (!inputToUse || isRunning) return;
-
-      setUserInput(inputToUse);
-      setLocalInput("");
+      if (!userInput.trim() || isRunning) return;
       await startLoop();
     },
-    [localInput, userInput, isRunning, setUserInput, startLoop]
+    [userInput, isRunning, startLoop]
   );
 
   const handleReset = useCallback(() => {
-    setLocalInput("");
     reset();
   }, [reset]);
 
@@ -46,13 +40,10 @@ export function UserInput() {
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const value = e.target.value;
       if (!value) return;
-      setLocalInput(value);
       setUserInput(value);
     },
     [setUserInput]
   );
-
-  const displayValue = localInput || userInput;
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
@@ -71,34 +62,35 @@ export function UserInput() {
       <div className="relative flex-1">
         <Input
           placeholder="输入您的问题"
-          value={displayValue}
-          onChange={(e) => {
-            setLocalInput(e.target.value);
-            setUserInput(e.target.value);
-          }}
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
           disabled={isRunning}
           className="pr-10 h-9 text-sm"
         />
       </div>
-      <Button
-        type="submit"
-        variant="accent"
-        size="sm"
-        disabled={isRunning || (!localInput.trim() && !userInput.trim())}
-        className="shrink-0"
-      >
-        {isRunning ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            运行中...
-          </>
-        ) : (
-          <>
-            <Send className="h-4 w-4" />
-            运行
-          </>
-        )}
-      </Button>
+      {isRunning ? (
+        <Button
+          type="button"
+          variant="accent"
+          size="sm"
+          onClick={cancel}
+          className="shrink-0"
+        >
+          <X className="h-4 w-4" />
+          取消
+        </Button>
+      ) : (
+        <Button
+          type="submit"
+          variant="accent"
+          size="sm"
+          disabled={!userInput.trim()}
+          className="shrink-0"
+        >
+          <Send className="h-4 w-4" />
+          运行
+        </Button>
+      )}
       <Button
         type="button"
         variant="ghost"

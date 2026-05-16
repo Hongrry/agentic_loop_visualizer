@@ -78,3 +78,11 @@ export type AccumulatedToolCall = {
     arguments: string;
   };
 };
+
+export type RuntimeErrorCode = "auth_error" | "rate_limit" | "network_timeout" | "abort" | "api_error" | "unknown";
+
+export type RuntimeError = {
+  code: RuntimeErrorCode;
+  message: string;
+  retryable: boolean;
+};
