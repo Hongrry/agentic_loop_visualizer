@@ -23,19 +23,32 @@ const AnimatedEdge = memo(({ id, sourceX, sourceY, targetX, targetY, sourcePosit
   });
 
   return (
-    <BaseEdge
-      id={id}
-      path={edgePath}
-      markerEnd={markerEnd}
-      markerStart={markerStart}
-      style={{
-        stroke: isActive ? color : "rgba(255,255,255,0.22)",
-        strokeWidth: isActive ? 2 : 1.5,
-        strokeDasharray: dashed ? "6 4" : undefined,
-        opacity: isActive ? 0.7 : 0.45,
-        transition: "stroke 0.7s ease, opacity 0.7s ease",
-      }}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerEnd={markerEnd}
+        markerStart={markerStart}
+        style={{
+          stroke: isActive ? color : "rgba(255,255,255,0.22)",
+          strokeWidth: isActive ? 2 : 1.5,
+          strokeDasharray: dashed ? "6 4" : undefined,
+          opacity: isActive ? 0.7 : 0.45,
+          transition: "stroke 0.7s ease, opacity 0.7s ease",
+        }}
+      />
+      {isActive && (
+        <path
+          d={edgePath}
+          fill="none"
+          stroke={color}
+          strokeWidth={2}
+          strokeDasharray="8 6"
+          opacity={0.6}
+          className="animated-flow"
+        />
+      )}
+    </>
   );
 });
 

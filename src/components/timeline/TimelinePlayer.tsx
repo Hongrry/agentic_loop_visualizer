@@ -6,6 +6,7 @@ import {
   SkipForward,
   SkipBack,
   RotateCcw,
+  Gauge,
   Brain,
   Wrench,
   Eye,
@@ -120,12 +121,22 @@ export function TimelinePlayer() {
   const status = useRuntimeStore((s) => s.status);
   const playing = useRuntimeStore((s) => s.playing);
 
+  const speed = useRuntimeStore((s) => s.speed);
+  const setSpeed = (s: number) => useRuntimeStore.setState({ speed: s });
+
   const nextStep = useRuntimeStore((s) => s.nextStep);
   const previousStep = useRuntimeStore((s) => s.previousStep);
   const play = useRuntimeStore((s) => s.play);
   const pause = useRuntimeStore((s) => s.pause);
   const replay = useRuntimeStore((s) => s.replay);
   const reset = useRuntimeStore((s) => s.reset);
+
+  const handleStepClick = (index: number) => {
+    pause();
+    useRuntimeStore.setState({ currentStepIndex: index });
+  };
+
+  const speedOptions = [0.5, 1, 2, 4];
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -192,6 +203,25 @@ export function TimelinePlayer() {
           <SkipForward className="h-4 w-4" />
         </Button>
 
+        <div className="w-px h-4 bg-white/10 mx-1" />
+        <div className="flex items-center gap-0.5">
+          <Gauge className="h-3 w-3 text-white/30 shrink-0" />
+          {speedOptions.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSpeed(s)}
+              className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors duration-200 cursor-pointer ${
+                speed === s
+                  ? "bg-accent-500/15 text-accent-400"
+                  : "text-white/35 hover:text-white/60 hover:bg-white/5"
+              }`}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+        <div className="w-px h-4 bg-white/10 mx-1" />
         <div className="ml-auto">
           <Badge
             variant={
@@ -230,7 +260,7 @@ export function TimelinePlayer() {
                 index={index}
                 isCurrent={index === currentStepIndex}
                 isPast={index < currentStepIndex}
-                onClick={() => useRuntimeStore.setState({ currentStepIndex: index })}
+                onClick={() => handleStepClick(index)}
               />
               {index < steps.length - 1 && (
                 <motion.div

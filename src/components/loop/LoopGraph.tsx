@@ -44,6 +44,31 @@ function getCompletedPhases(steps: LoopStep[], currentIndex: number): Set<LoopPh
   return completed;
 }
 
+function getEdgeLabels(steps: LoopStep[]): {
+  thinkToAct: string | null;
+  thinkToEnd: string | null;
+  observeToThink: string | null;
+} {
+  let thinkToAct: string | null = null;
+  let thinkToEnd: string | null = null;
+  let observeToThink: string | null = null;
+
+  for (const step of steps) {
+    if (step.phase === "think" && step.transitionLabel) {
+      if (step.transitionLabel.includes("工具") || step.transitionLabel.includes("tool") || step.transitionLabel.includes("调用")) {
+        thinkToAct = step.transitionLabel;
+      } else {
+        thinkToEnd = step.transitionLabel;
+      }
+    }
+    if (step.phase === "observe" && step.transitionLabel) {
+      observeToThink = step.transitionLabel;
+    }
+  }
+
+  return { thinkToAct, thinkToEnd, observeToThink };
+}
+
 const ConnectionLine: ConnectionLineComponent = ({ fromX, fromY, toX, toY }) => {
   const dx = toX - fromX;
   const dy = toY - fromY;
@@ -66,6 +91,7 @@ export function LoopGraph() {
   const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] : undefined;
   const currentPhase = getCurrentPhase(currentStep);
   const completedPhases = getCompletedPhases(steps, currentStepIndex);
+  const edgeLabels = getEdgeLabels(steps);
 
   const nodes: Node<PhaseNodeData>[] = useMemo(() => {
     return phaseOrder.map((phase) => ({
@@ -97,6 +123,10 @@ export function LoopGraph() {
       sourceHandle: "s-right",
       targetHandle: "t-top",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.think.color, width: 16, height: 16 },
+      label: edgeLabels.thinkToAct || undefined,
+      labelStyle: { fill: phaseConfig.think.color, fontSize: 10, fontWeight: 500 },
+      labelBgStyle: { fill: "rgba(0,0,0,0.7)", rx: 4 },
+      labelBgPadding: [6, 3] as [number, number],
       data: {
         isActive: completedPhases.has("think") && currentPhase === "act" && running,
         color: phaseConfig.think.color,
@@ -127,6 +157,10 @@ export function LoopGraph() {
       sourceHandle: "s-left",
       targetHandle: "t-top",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.end.color, width: 16, height: 16 },
+      label: edgeLabels.thinkToEnd || undefined,
+      labelStyle: { fill: phaseConfig.end.color, fontSize: 10, fontWeight: 500 },
+      labelBgStyle: { fill: "rgba(0,0,0,0.7)", rx: 4 },
+      labelBgPadding: [6, 3] as [number, number],
       data: {
         isActive: completedPhases.has("think") && currentPhase === "end" && running,
         color: phaseConfig.end.color,
@@ -141,6 +175,10 @@ export function LoopGraph() {
       sourceHandle: "s-top",
       targetHandle: "t-bottom",
       markerEnd: { type: MarkerType.ArrowClosed, color: phaseConfig.observe.color, width: 16, height: 16 },
+      label: edgeLabels.observeToThink || undefined,
+      labelStyle: { fill: phaseConfig.observe.color, fontSize: 10, fontWeight: 500 },
+      labelBgStyle: { fill: "rgba(0,0,0,0.7)", rx: 4 },
+      labelBgPadding: [6, 3] as [number, number],
       data: {
         isActive: completedPhases.has("observe") && currentPhase === "think" && running,
         color: phaseConfig.observe.color,
@@ -149,7 +187,7 @@ export function LoopGraph() {
     });
 
     return edgeList;
-  }, [currentPhase, completedPhases, status]);
+  }, [currentPhase, completedPhases, status, edgeLabels]);
 
   const proOptions = { hideAttribution: true };
 
