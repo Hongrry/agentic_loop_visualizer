@@ -9,6 +9,10 @@ import {
   AlertCircle,
   Clock,
   ChevronRight,
+  RefreshCw,
+  ShieldAlert,
+  WifiOff,
+  Timer,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownContent } from "@/components/ui/MarkdownContent";
@@ -296,17 +300,46 @@ export function StepDetailPanel() {
   }
 
   if (status === "error") {
-    const errorMsg = useRuntimeStore.getState().error;
+    const runtimeError = useRuntimeStore.getState().error;
+    const errorMsg = runtimeError?.message ?? "发生未知错误";
+    const errorCode = runtimeError?.code ?? "unknown";
+    const retryable = runtimeError?.retryable ?? false;
+
+    const errorConfig: Record<string, { icon: typeof AlertCircle; label: string; hint: string }> = {
+      auth_error: { icon: ShieldAlert, label: "认证失败", hint: "请检查 .env 文件中的 VITE_OPENAI_API_KEY 是否正确配置" },
+      rate_limit: { icon: Timer, label: "请求限流", hint: "API 请求频率超限，请等待 30 秒后重试" },
+      network_timeout: { icon: WifiOff, label: "网络错误", hint: "请检查网络连接是否正常，或 API 地址是否可访问" },
+      api_error: { icon: AlertCircle, label: "服务器错误", hint: "上游 API 服务异常，请稍后重试" },
+      unknown: { icon: AlertCircle, label: "执行出错", hint: "" },
+    };
+    const config = errorConfig[errorCode] ?? errorConfig.unknown;
+    const ErrorIcon = config.icon;
+
     return (
       <div className="h-full flex flex-col">
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/5">
-          <AlertCircle className="h-3.5 w-3.5 text-glow-rose" />
-          <span className="text-xs font-semibold text-glow-rose uppercase tracking-wider">执行出错</span>
+          <ErrorIcon className="h-3.5 w-3.5 text-glow-rose" />
+          <span className="text-xs font-semibold text-glow-rose uppercase tracking-wider">{config.label}</span>
         </div>
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 flex flex-col gap-4">
           <div className="rounded-lg bg-glow-rose/8 p-4 text-sm text-glow-rose border border-glow-rose/15">
-            {errorMsg ?? "发生未知错误"}
+            {errorMsg}
           </div>
+          {config.hint && (
+            <div className="rounded-lg bg-white/[0.02] p-3 text-xs text-white/40 border border-white/5">
+              {config.hint}
+            </div>
+          )}
+          {retryable && (
+            <button
+              type="button"
+              onClick={() => useRuntimeStore.getState().startLoop()}
+              className="flex items-center justify-center gap-2 rounded-lg bg-accent-500/10 px-4 py-2.5 text-sm text-accent-400 border border-accent-500/20 hover:bg-accent-500/20 transition-colors cursor-pointer"
+            >
+              <RefreshCw className="h-4 w-4" />
+              重试
+            </button>
+          )}
         </div>
       </div>
     );

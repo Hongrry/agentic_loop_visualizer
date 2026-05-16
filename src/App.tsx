@@ -3,6 +3,7 @@ import { Cpu, Activity, Key, Server } from "lucide-react";
 import { LoopGraph } from "@/components/loop/LoopGraph";
 import { StepDetailPanel } from "@/components/panels/StepDetailPanel";
 import { DecisionTrail } from "@/components/panels/DecisionTrail";
+import { ChatHistoryPanel } from "@/components/panels/ChatHistoryPanel";
 import { TimelinePlayer } from "@/components/timeline/TimelinePlayer";
 import { UserInput } from "@/components/input/UserInput";
 import { Badge } from "@/components/ui/badge";
@@ -80,9 +81,14 @@ export default function App() {
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex-[2] min-w-0 border-r border-white/5"
+          className="flex-[2] min-w-0 border-r border-white/5 flex flex-col"
         >
-          <DecisionTrail />
+          <div className="flex-[3] min-h-0 border-b border-white/5">
+            <ChatHistoryPanel />
+          </div>
+          <div className="flex-[2] min-h-0">
+            <DecisionTrail />
+          </div>
         </motion.aside>
 
         <motion.section

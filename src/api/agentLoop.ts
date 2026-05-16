@@ -1,4 +1,4 @@
-import type { LoopStep, ApiResponse, StreamChunk } from "@/types/runtime";
+import type { LoopStep, ApiResponse, StreamChunk, RuntimeError } from "@/types/runtime";
 import { callOpenAIStream, buildToolMessage, buildAssistantToolCallMessage, getApiConfig } from "./openai";
 import { toolDefinitions, executeToolCall } from "./tools";
 
@@ -19,15 +19,37 @@ function nextStepId(): string {
   return `step-${stepCounter}`;
 }
 
+function classifyError(err: unknown): RuntimeError {
+  const msg = err instanceof Error ? err.message : "未知错误";
+  if (msg.includes("API Key") || msg.includes("401") || msg.includes("无效") || msg.includes("Unauthorized")) {
+    return { code: "auth_error", message: "API Key 无效，请检查 VITE_OPENAI_API_KEY 配置", retryable: false };
+  }
+  if (msg.includes("Rate Limit") || msg.includes("429")) {
+    return { code: "rate_limit", message: "API 请求频率超限，请稍后重试", retryable: true };
+  }
+  if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("timeout") || msg.includes("Failed to fetch")) {
+    return { code: "network_timeout", message: "网络连接失败，请检查网络后重试", retryable: true };
+  }
+  const statusMatch = msg.match(/错误\s*\((\d+)\)/);
+  if (statusMatch) {
+    const status = parseInt(statusMatch[1]);
+    if (status >= 500) return { code: "api_error", message: `服务器错误 (${status})，请稍后重试`, retryable: true };
+    if (status >= 400) return { code: "api_error", message: `请求错误 (${status})`, retryable: false };
+  }
+  return { code: "unknown", message: msg, retryable: true };
+}
+
 export type LoopResult = {
   steps: LoopStep[];
   messages: ChatMessage[];
+  error?: RuntimeError;
 };
 
 export async function runAgenticLoop(
   userInput: string,
   onStep: StepCallback,
-  existingMessages?: ChatMessage[]
+  existingMessages?: ChatMessage[],
+  signal?: AbortSignal
 ): Promise<LoopResult> {
   const { model, hasKey } = getApiConfig();
 
@@ -142,11 +164,16 @@ export async function runAgenticLoop(
           };
           steps[steps.length - 1] = { ...thinkStep };
           onStep({ ...thinkStep });
-        }
+        },
+        signal
       );
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "未知错误";
-      thinkStep.decisionReason = errorMsg;
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return { steps, messages, error: { code: "abort", message: "请求已取消", retryable: false } };
+      }
+
+      const error = classifyError(err);
+      thinkStep.decisionReason = error.message;
       thinkStep.transitionLabel = "执行出错";
       thinkStep.duration = Date.now() - thinkStart;
       steps[steps.length - 1] = { ...thinkStep };
@@ -156,8 +183,8 @@ export async function runAgenticLoop(
         id: nextStepId(),
         phase: "end",
         title: "执行出错",
-        finalAnswer: `API 调用失败: ${errorMsg}`,
-        decisionReason: errorMsg,
+        finalAnswer: `API 调用失败: ${error.message}`,
+        decisionReason: error.message,
         transitionLabel: "执行出错",
         loopRound,
         contextBefore: [...contextHistory],
@@ -166,7 +193,7 @@ export async function runAgenticLoop(
       };
       steps.push(errorStep);
       onStep(errorStep);
-      return { steps, messages };
+      return { steps, messages, error };
     }
 
     const duration = Date.now() - thinkStart;
